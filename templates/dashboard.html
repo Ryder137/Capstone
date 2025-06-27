@@ -1,0 +1,340 @@
+{% extends "base_new.html" %} {% block title %}Dashboard - UniCare{% endblock %} {%
+block content %}
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">
+        Welcome back, {{ session.user.name }}!
+      </h1>
+      <p class="text-gray-600">Here's your mental health journey overview</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div
+            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+          >
+            <i class="bi bi-clipboard-data text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-500">Assessments</h3>
+            <p class="text-2xl font-bold text-gray-800">
+              {{ assessments|length }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div
+            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+          >
+            <i class="bi bi-journal-text text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-500">Journal Entries</h3>
+            <p class="text-2xl font-bold text-gray-800">
+              {{ journal_entries|length }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div
+            class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+          >
+            <i class="bi bi-wind text-purple-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-500">
+              Breathing Sessions
+            </h3>
+            <p class="text-2xl font-bold text-gray-800">
+              {% set total_sessions =
+              breathing_stats|map(attribute='total_sessions')|sum %} {{
+              total_sessions or 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div
+            class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+          >
+            <i class="bi bi-controller text-orange-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-500">Games Played</h3>
+            <p class="text-2xl font-bold text-gray-800">
+              {{ game_scores|length }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Recent Assessments -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Recent Assessments
+        </h2>
+        {% if assessments %}
+        <div class="space-y-4">
+          {% for assessment in assessments[:3] %}
+          <div
+            class="border-l-4 {% if assessment.level == 'Minimal' %}border-green-500{% elif assessment.level == 'Mild' %}border-yellow-500{% elif assessment.level == 'Moderate' %}border-orange-500{% else %}border-red-500{% endif %} pl-4 py-2"
+          >
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-medium text-gray-800">
+                  {{ assessment.level }} Level
+                </p>
+                <p class="text-sm text-gray-600">
+                  Score: {{ assessment.total_score }}/15
+                </p>
+              </div>
+              <span class="text-sm text-gray-500"
+                >{{ assessment.created_at[:10] }}</span
+              >
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <a
+            href="{{ url_for('assessment') }}"
+            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >Take New Assessment →</a
+          >
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <i class="bi bi-clipboard-data text-gray-300 text-4xl mb-4"></i>
+          <p class="text-gray-500 mb-4">No assessments taken yet</p>
+          <a
+            href="{{ url_for('assessment') }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+            >Take Your First Assessment</a
+          >
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Journal Stats -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Journal Insights
+        </h2>
+        {% if journal_stats %}
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-600 mb-2">
+              Most Common Mood
+            </h3>
+            {% set top_mood = journal_stats[0] %}
+            <div class="flex items-center">
+              <span class="text-2xl mr-2">
+                {% if top_mood.mood == 'happy' %}😊 {% elif top_mood.mood ==
+                'sad' %}😢 {% elif top_mood.mood == 'anxious' %}😰 {% elif
+                top_mood.mood == 'calm' %}😌 {% elif top_mood.mood == 'angry'
+                %}😠 {% else %}😐{% endif %}
+              </span>
+              <span class="font-semibold capitalize">{{ top_mood.mood }}</span>
+              <span class="text-sm text-gray-500 ml-2"
+                >({{ top_mood.mood_count }} times)</span
+              >
+            </div>
+          </div>
+
+          {% if journal_stats[0].avg_anxiety %}
+          <div>
+            <h3 class="text-sm font-medium text-gray-600 mb-2">
+              Average Anxiety Level
+            </h3>
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                <div
+                  class="bg-red-500 h-2 rounded-full"
+                  style="width: {{ (journal_stats[0].avg_anxiety / 10) * 100 }}%"
+                ></div>
+              </div>
+              <span class="text-sm font-medium"
+                >{{ "%.1f"|format(journal_stats[0].avg_anxiety) }}/10</span
+              >
+            </div>
+          </div>
+          {% endif %} {% if journal_stats[0].avg_stress %}
+          <div>
+            <h3 class="text-sm font-medium text-gray-600 mb-2">
+              Average Stress Level
+            </h3>
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                <div
+                  class="bg-orange-500 h-2 rounded-full"
+                  style="width: {{ (journal_stats[0].avg_stress / 10) * 100 }}%"
+                ></div>
+              </div>
+              <span class="text-sm font-medium"
+                >{{ "%.1f"|format(journal_stats[0].avg_stress) }}/10</span
+              >
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="mt-4">
+          <a
+            href="{{ url_for('journal') }}"
+            class="text-green-600 hover:text-green-800 text-sm font-medium"
+            >Add New Entry →</a
+          >
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <i class="bi bi-journal-text text-gray-300 text-4xl mb-4"></i>
+          <p class="text-gray-500 mb-4">Start journaling to see insights</p>
+          <a
+            href="{{ url_for('journal') }}"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300"
+            >Start Journaling</a
+          >
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Breathing Stats -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Breathing Practice
+        </h2>
+        {% if breathing_stats %}
+        <div class="space-y-4">
+          {% for stat in breathing_stats %}
+          <div
+            class="flex justify-between items-center py-2 border-b border-gray-100"
+          >
+            <div>
+              <p class="font-medium text-gray-800 capitalize">
+                {{ stat.technique }}
+              </p>
+              <p class="text-sm text-gray-600">
+                {{ stat.technique_count }} sessions
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="font-medium text-gray-800">
+                {{ (stat.total_duration / 60)|round|int }} min
+              </p>
+              <p class="text-sm text-gray-600">total</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <a
+            href="{{ url_for('breathing') }}"
+            class="text-purple-600 hover:text-purple-800 text-sm font-medium"
+            >Practice Breathing →</a
+          >
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <i class="bi bi-wind text-gray-300 text-4xl mb-4"></i>
+          <p class="text-gray-500 mb-4">No breathing sessions yet</p>
+          <a
+            href="{{ url_for('breathing') }}"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300"
+            >Start Practicing</a
+          >
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Recent Game Scores -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Recent Game Activity
+        </h2>
+        {% if game_scores %}
+        <div class="space-y-3">
+          {% for score in game_scores[:5] %}
+          <div class="flex justify-between items-center py-2">
+            <div>
+              <p class="font-medium text-gray-800 capitalize">
+                {{ score.game_type.replace('_', ' ') }}
+              </p>
+              <p class="text-sm text-gray-600">{{ score.created_at[:10] }}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-lg text-blue-600">{{ score.score }}</p>
+              <p class="text-sm text-gray-600">Level {{ score.level }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <a
+            href="{{ url_for('games') }}"
+            class="text-orange-600 hover:text-orange-800 text-sm font-medium"
+            >Play Games →</a
+          >
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <i class="bi bi-controller text-gray-300 text-4xl mb-4"></i>
+          <p class="text-gray-500 mb-4">No games played yet</p>
+          <a
+            href="{{ url_for('games') }}"
+            class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition duration-300"
+            >Play Games</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a
+          href="{{ url_for('assessment') }}"
+          class="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition duration-300"
+        >
+          <i class="bi bi-clipboard-data text-blue-600 text-2xl mb-2"></i>
+          <span class="text-sm font-medium text-blue-800">Take Assessment</span>
+        </a>
+        <a
+          href="{{ url_for('journal') }}"
+          class="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition duration-300"
+        >
+          <i class="bi bi-journal-plus text-green-600 text-2xl mb-2"></i>
+          <span class="text-sm font-medium text-green-800">Write Journal</span>
+        </a>
+        <a
+          href="{{ url_for('chatbot') }}"
+          class="flex flex-col items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition duration-300"
+        >
+          <i class="bi bi-chat-dots text-indigo-600 text-2xl mb-2"></i>
+          <span class="text-sm font-medium text-indigo-800">Chat Support</span>
+        </a>
+        <a
+          href="{{ url_for('breathing') }}"
+          class="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition duration-300"
+        >
+          <i class="bi bi-wind text-purple-600 text-2xl mb-2"></i>
+          <span class="text-sm font-medium text-purple-800">Breathing</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

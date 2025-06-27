@@ -1,0 +1,233 @@
+{% extends "base_new.html" %} {% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h1 class="text-5xl font-bold mb-6">Your Mental Health Matters</h1>
+    <p class="text-xl mb-8 max-w-3xl mx-auto">
+      Welcome to UniCare - a comprehensive platform dedicated to supporting your
+      mental wellness journey with tools, resources, and professional guidance.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="{{ url_for('assessment') }}"
+        class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
+      >
+        Take Assessment
+      </a>
+      <a
+        href="{{ url_for('chatbot') }}"
+        class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300"
+      >
+        Get Support Now
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Mental Health Tools Section -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">
+      Mental Health Tools & Resources
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div
+        class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-clipboard-check text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">
+          Mental Health Assessment
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Take our scientifically-based assessment to understand your current
+          mental health status and get personalized recommendations.
+        </p>
+        <a
+          href="{{ url_for('assessment') }}"
+          class="text-blue-600 font-semibold hover:text-blue-800 transition duration-300"
+          >Start Assessment →</a
+        >
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-journal-text text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">Daily Journal</h3>
+        <p class="text-gray-600 mb-4">
+          Express your thoughts and feelings in a safe space. Track your mood
+          and identify patterns in your mental health journey.
+        </p>
+        <a
+          href="{{ url_for('journal') }}"
+          class="text-green-600 font-semibold hover:text-green-800 transition duration-300"
+          >Start Writing →</a
+        >
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-chat-heart text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">
+          AI Psychology Support
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Chat with our AI assistant trained in psychology principles. Get
+          immediate support and coping strategies 24/7.
+        </p>
+        <a
+          href="{{ url_for('chatbot') }}"
+          class="text-purple-600 font-semibold hover:text-purple-800 transition duration-300"
+          >Start Chatting →</a
+        >
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-puzzle text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">
+          Mental Games & Puzzles
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Boost your cognitive function and reduce stress with our collection of
+          brain-training games and therapeutic puzzles.
+        </p>
+        <a
+          href="{{ url_for('games') }}"
+          class="text-orange-600 font-semibold hover:text-orange-800 transition duration-300"
+          >Play Games →</a
+        >
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-teal-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-wind text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">
+          Breathing Exercises
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Learn and practice various breathing techniques to manage anxiety,
+          stress, and improve your overall mental well-being.
+        </p>
+        <a
+          href="{{ url_for('breathing') }}"
+          class="text-teal-600 font-semibold hover:text-teal-800 transition duration-300"
+          >Start Breathing →</a
+        >
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300"
+      >
+        <div
+          class="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center mb-4"
+        >
+          <i class="bi bi-heart-pulse text-white text-xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3 text-gray-800">Crisis Support</h3>
+        <p class="text-gray-600 mb-4">
+          Immediate help is available. Access emergency resources and connect
+          with crisis support professionals when you need it most.
+        </p>
+        <a
+          href="tel:988"
+          class="text-pink-600 font-semibold hover:text-pink-800 transition duration-300"
+          >Get Help Now →</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-16 bg-gray-100">
+  <div class="max-w-7xl mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">
+      Mental Health Matters
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="text-3xl font-bold text-blue-600 mb-2">1 in 4</div>
+        <p class="text-gray-600">
+          People experience mental health issues each year
+        </p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="text-3xl font-bold text-green-600 mb-2">75%</div>
+        <p class="text-gray-600">
+          Improvement rate with proper mental health care
+        </p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="text-3xl font-bold text-purple-600 mb-2">24/7</div>
+        <p class="text-gray-600">Support available through our platform</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="text-3xl font-bold text-orange-600 mb-2">100K+</div>
+        <p class="text-gray-600">People helped improve their mental wellness</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-16 bg-gradient-to-r from-green-500 to-blue-500 text-white">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h2 class="text-4xl font-bold mb-6">
+      Start Your Mental Health Journey Today
+    </h2>
+    <p class="text-xl mb-8 max-w-2xl mx-auto">
+      Take the first step towards better mental health. Our comprehensive tools
+      and resources are here to support you every step of the way.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="{{ url_for('assessment') }}"
+        class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
+      >
+        <i class="bi bi-clipboard-check mr-2"></i>Take Free Assessment
+      </a>
+      <a
+        href="{{ url_for('chatbot') }}"
+        class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300"
+      >
+        <i class="bi bi-chat-heart mr-2"></i>Chat with AI Support
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Emergency Notice -->
+<section class="bg-red-600 text-white py-4">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <p class="font-semibold">
+      <i class="bi bi-exclamation-triangle mr-2"></i>
+      If you're having thoughts of suicide or self-harm, please call 988
+      (Suicide & Crisis Lifeline) immediately.
+    </p>
+  </div>
+</section>
+{% endblock %}

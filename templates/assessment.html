@@ -1,0 +1,308 @@
+{% extends "base_new.html" %} {% block title %}Mental Health Assessment - UniCare{%
+endblock %} {% block content %}
+<section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">
+        Mental Health Assessment
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        This brief assessment will help you understand your current mental
+        health status. Please answer honestly for the most accurate results.
+      </p>
+      <div
+        class="mt-4 p-4 bg-yellow-100 rounded-lg border-l-4 border-yellow-500"
+      >
+        <p class="text-sm text-yellow-800">
+          <i class="bi bi-info-circle mr-2"></i>
+          This assessment is not a substitute for professional medical advice.
+          Please consult a healthcare provider for proper diagnosis and
+          treatment.
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8">
+      <div id="assessment-form">
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-sm font-medium text-blue-600">Progress</span>
+            <span class="text-sm font-medium text-blue-600" id="progress-text"
+              >1 of {{ questions|length }}</span
+            >
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div
+              class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style="width: {{ (1/questions|length * 100)|round }}%"
+              id="progress-bar"
+            ></div>
+          </div>
+        </div>
+
+        <div id="questions-container">
+          {% for question in questions %}
+          <div
+            class="question-slide {% if loop.first %}active{% else %}hidden{% endif %}"
+            data-question="{{ loop.index0 }}"
+          >
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">
+              {{ question.question }}
+            </h3>
+            <div class="space-y-3">
+              {% for option in question.options %}
+              <label
+                class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition duration-300"
+              >
+                <input
+                  type="radio"
+                  name="question_{{ question.id }}"
+                  value="{{ question.scores[loop.index0] }}"
+                  class="hidden answer-radio"
+                />
+                <div
+                  class="w-5 h-5 border-2 border-gray-300 rounded-full mr-4 flex items-center justify-center radio-indicator"
+                >
+                  <div
+                    class="w-3 h-3 bg-blue-600 rounded-full hidden radio-dot"
+                  ></div>
+                </div>
+                <span class="text-gray-700">{{ option }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="flex justify-between mt-8">
+          <button
+            id="prev-btn"
+            class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition duration-300 hidden"
+          >
+            <i class="bi bi-arrow-left mr-2"></i>Previous
+          </button>
+          <div class="flex-1"></div>
+          <button
+            id="next-btn"
+            class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300 opacity-50 cursor-not-allowed"
+            disabled
+          >
+            Next<i class="bi bi-arrow-right ml-2"></i>
+          </button>
+          <button
+            id="submit-btn"
+            class="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition duration-300 hidden"
+          >
+            <i class="bi bi-check-circle mr-2"></i>Get Results
+          </button>
+        </div>
+      </div>
+
+      <div id="results-container" class="hidden">
+        <div class="text-center">
+          <div
+            class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+            id="result-icon"
+          >
+            <i class="bi bi-check-circle text-4xl text-white"></i>
+          </div>
+          <h2 class="text-3xl font-bold mb-4" id="result-title">
+            Assessment Complete
+          </h2>
+          <div class="text-6xl font-bold mb-4" id="result-score"></div>
+          <div class="text-xl font-semibold mb-4" id="result-level"></div>
+          <div class="bg-gray-100 rounded-lg p-6 mb-6">
+            <p class="text-gray-700" id="result-recommendation"></p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a
+              href="{{ url_for('chatbot') }}"
+              class="block p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition duration-300"
+            >
+              <i class="bi bi-chat-heart text-blue-600 text-2xl mb-2"></i>
+              <div class="font-semibold text-blue-800">Chat Support</div>
+              <div class="text-sm text-blue-600">Talk to our AI counselor</div>
+            </a>
+            <a
+              href="{{ url_for('breathing') }}"
+              class="block p-4 bg-green-100 rounded-lg hover:bg-green-200 transition duration-300"
+            >
+              <i class="bi bi-wind text-green-600 text-2xl mb-2"></i>
+              <div class="font-semibold text-green-800">
+                Breathing Exercises
+              </div>
+              <div class="text-sm text-green-600">Calm your mind</div>
+            </a>
+            <a
+              href="{{ url_for('journal') }}"
+              class="block p-4 bg-purple-100 rounded-lg hover:bg-purple-200 transition duration-300"
+            >
+              <i class="bi bi-journal-text text-purple-600 text-2xl mb-2"></i>
+              <div class="font-semibold text-purple-800">Daily Journal</div>
+              <div class="text-sm text-purple-600">Express your thoughts</div>
+            </a>
+          </div>
+          <button
+            onclick="location.reload()"
+            class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+          >
+            <i class="bi bi-arrow-clockwise mr-2"></i>Take Assessment Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  let currentQuestion = 0;
+  const totalQuestions = {{ questions|length }};
+  let answers = [];
+
+  document.addEventListener('DOMContentLoaded', function() {
+      // Handle radio button selection
+      document.querySelectorAll('.answer-radio').forEach(radio => {
+          radio.addEventListener('change', function() {
+              const questionDiv = this.closest('.question-slide');
+              const questionIndex = parseInt(questionDiv.dataset.question);
+              answers[questionIndex] = parseInt(this.value);
+
+              // Update radio button styling
+              questionDiv.querySelectorAll('.radio-indicator').forEach(indicator => {
+                  indicator.classList.remove('border-blue-600');
+                  indicator.querySelector('.radio-dot').classList.add('hidden');
+              });
+
+              const selectedIndicator = this.parentElement.querySelector('.radio-indicator');
+              selectedIndicator.classList.add('border-blue-600');
+              selectedIndicator.querySelector('.radio-dot').classList.remove('hidden');
+
+              // Enable next button
+              const nextBtn = document.getElementById('next-btn');
+              nextBtn.disabled = false;
+              nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          });
+      });
+
+      // Handle next button
+      document.getElementById('next-btn').addEventListener('click', function() {
+          if (currentQuestion < totalQuestions - 1) {
+              currentQuestion++;
+              updateQuestion();
+          }
+      });
+
+      // Handle previous button
+      document.getElementById('prev-btn').addEventListener('click', function() {
+          if (currentQuestion > 0) {
+              currentQuestion--;
+              updateQuestion();
+          }
+      });
+
+      // Handle submit button
+      document.getElementById('submit-btn').addEventListener('click', function() {
+          submitAssessment();
+      });
+  });
+
+  function updateQuestion() {
+      // Hide all questions
+      document.querySelectorAll('.question-slide').forEach(slide => {
+          slide.classList.add('hidden');
+          slide.classList.remove('active');
+      });
+
+      // Show current question
+      const currentSlide = document.querySelector(`[data-question="${currentQuestion}"]`);
+      currentSlide.classList.remove('hidden');
+      currentSlide.classList.add('active');
+
+      // Update progress
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+
+      progressBar.style.width = progress + '%';
+      progressText.textContent = `${currentQuestion + 1} of ${totalQuestions}`;
+
+      // Update buttons
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const submitBtn = document.getElementById('submit-btn');
+
+      if (currentQuestion === 0) {
+          prevBtn.classList.add('hidden');
+      } else {
+          prevBtn.classList.remove('hidden');
+      }
+
+      if (currentQuestion === totalQuestions - 1) {
+          nextBtn.classList.add('hidden');
+          submitBtn.classList.remove('hidden');
+      } else {
+          nextBtn.classList.remove('hidden');
+          submitBtn.classList.add('hidden');
+      }
+
+      // Check if current question is answered
+      const currentAnswer = answers[currentQuestion];
+      if (currentAnswer !== undefined) {
+          nextBtn.disabled = false;
+          nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+          nextBtn.disabled = true;
+          nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+  }
+
+  function submitAssessment() {
+      fetch('/submit_assessment', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ answers: answers })
+      })
+      .then(response => response.json())
+      .then(data => {
+          showResults(data);
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while submitting your assessment. Please try again.');
+      });
+  }
+
+  function showResults(data) {
+      document.getElementById('assessment-form').classList.add('hidden');
+      document.getElementById('results-container').classList.remove('hidden');
+
+      const resultIcon = document.getElementById('result-icon');
+      const resultScore = document.getElementById('result-score');
+      const resultLevel = document.getElementById('result-level');
+      const resultRecommendation = document.getElementById('result-recommendation');
+
+      resultScore.textContent = `${data.score}/${totalQuestions * 3}`;
+      resultLevel.textContent = `${data.level} Symptoms`;
+      resultRecommendation.textContent = data.recommendation;
+
+      // Set colors based on level
+      const colorClasses = {
+          'green': ['bg-green-500', 'text-green-800'],
+          'yellow': ['bg-yellow-500', 'text-yellow-800'],
+          'orange': ['bg-orange-500', 'text-orange-800'],
+          'red': ['bg-red-500', 'text-red-800']
+      };
+
+      const colors = colorClasses[data.color] || colorClasses['green'];
+      resultIcon.className = `w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${colors[0]}`;
+      resultLevel.className = `text-xl font-semibold mb-4 ${colors[1]}`;
+  }
+</script>
+{% endblock %}

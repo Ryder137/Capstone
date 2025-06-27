@@ -1,0 +1,567 @@
+{% extends "base_new.html" %} {% block title %}Daily Journal - UniCare{% endblock %}
+{% block content %}
+<section class="py-16 bg-gradient-to-br from-green-50 to-blue-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">Daily Journal</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Express your thoughts, track your emotions, and reflect on your mental
+        health journey in a safe, private space.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Journal Entry Form -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+            <i class="bi bi-journal-plus text-green-600 mr-2"></i>
+            New Journal Entry
+          </h2>
+
+          <form id="journal-form">
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >How are you feeling today?</label
+              >
+              <div class="grid grid-cols-5 gap-3">
+                <label
+                  class="flex flex-col items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-red-300 transition duration-300 mood-option"
+                  data-mood="very-sad"
+                >
+                  <i class="bi bi-emoji-frown text-3xl text-red-500 mb-2"></i>
+                  <span class="text-xs text-gray-600">Very Sad</span>
+                  <input
+                    type="radio"
+                    name="mood"
+                    value="very-sad"
+                    class="hidden"
+                  />
+                </label>
+                <label
+                  class="flex flex-col items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-300 transition duration-300 mood-option"
+                  data-mood="sad"
+                >
+                  <i
+                    class="bi bi-emoji-neutral text-3xl text-orange-500 mb-2"
+                  ></i>
+                  <span class="text-xs text-gray-600">Sad</span>
+                  <input type="radio" name="mood" value="sad" class="hidden" />
+                </label>
+                <label
+                  class="flex flex-col items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-yellow-300 transition duration-300 mood-option"
+                  data-mood="neutral"
+                >
+                  <i
+                    class="bi bi-emoji-expressionless text-3xl text-yellow-500 mb-2"
+                  ></i>
+                  <span class="text-xs text-gray-600">Neutral</span>
+                  <input
+                    type="radio"
+                    name="mood"
+                    value="neutral"
+                    class="hidden"
+                  />
+                </label>
+                <label
+                  class="flex flex-col items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-300 transition duration-300 mood-option"
+                  data-mood="happy"
+                >
+                  <i class="bi bi-emoji-smile text-3xl text-green-500 mb-2"></i>
+                  <span class="text-xs text-gray-600">Happy</span>
+                  <input
+                    type="radio"
+                    name="mood"
+                    value="happy"
+                    class="hidden"
+                  />
+                </label>
+                <label
+                  class="flex flex-col items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition duration-300 mood-option"
+                  data-mood="very-happy"
+                >
+                  <i
+                    class="bi bi-emoji-laughing text-3xl text-blue-500 mb-2"
+                  ></i>
+                  <span class="text-xs text-gray-600">Very Happy</span>
+                  <input
+                    type="radio"
+                    name="mood"
+                    value="very-happy"
+                    class="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label
+                for="anxiety-level"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Anxiety Level (1-10)</label
+              >
+              <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">Low</span>
+                <input
+                  type="range"
+                  id="anxiety-level"
+                  name="anxiety-level"
+                  min="1"
+                  max="10"
+                  value="5"
+                  class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <span class="text-sm text-gray-500">High</span>
+                <span
+                  id="anxiety-value"
+                  class="text-sm font-semibold text-gray-700 w-6"
+                  >5</span
+                >
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label
+                for="stress-level"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Stress Level (1-10)</label
+              >
+              <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">Low</span>
+                <input
+                  type="range"
+                  id="stress-level"
+                  name="stress-level"
+                  min="1"
+                  max="10"
+                  value="5"
+                  class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <span class="text-sm text-gray-500">High</span>
+                <span
+                  id="stress-value"
+                  class="text-sm font-semibold text-gray-700 w-6"
+                  >5</span
+                >
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label
+                for="entry-title"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Entry Title (Optional)</label
+              >
+              <input
+                type="text"
+                id="entry-title"
+                name="title"
+                placeholder="Give your entry a title..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label
+                for="journal-content"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >What's on your mind?</label
+              >
+              <textarea
+                id="journal-content"
+                name="content"
+                rows="8"
+                placeholder="Write about your thoughts, feelings, experiences, or anything that comes to mind..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                required
+              ></textarea>
+              <div class="text-right text-sm text-gray-500 mt-1">
+                <span id="char-count">0</span> characters
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-3"
+                >What helped you today? (Select all that apply)</label
+              >
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="exercise"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Exercise</span>
+                </label>
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="meditation"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Meditation</span>
+                </label>
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="friends"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Friends/Family</span>
+                </label>
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="music"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Music</span>
+                </label>
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="reading"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Reading</span>
+                </label>
+                <label
+                  class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    name="helpful-activities"
+                    value="nature"
+                    class="text-green-600"
+                  />
+                  <span class="text-sm">Nature</span>
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition duration-300"
+            >
+              <i class="bi bi-save mr-2"></i>Save Entry
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Journal Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="space-y-6">
+          <!-- Quick Stats -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-graph-up text-blue-600 mr-2"></i>
+              Your Progress
+            </h3>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Entries this week</span>
+                <span class="font-semibold text-blue-600" id="weekly-entries"
+                  >0</span
+                >
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Average mood</span>
+                <span class="font-semibold text-green-600" id="average-mood"
+                  >-</span
+                >
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Streak</span>
+                <span class="font-semibold text-purple-600" id="streak-days"
+                  >0 days</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Journal Prompts -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-lightbulb text-yellow-600 mr-2"></i>
+              Today's Prompts
+            </h3>
+            <div class="space-y-3" id="journal-prompts">
+              <div
+                class="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400"
+              >
+                <p class="text-sm text-gray-700">
+                  What are three things you're grateful for today?
+                </p>
+              </div>
+              <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                <p class="text-sm text-gray-700">
+                  Describe a moment when you felt peaceful today.
+                </p>
+              </div>
+              <div
+                class="p-3 bg-green-50 rounded-lg border-l-4 border-green-400"
+              >
+                <p class="text-sm text-gray-700">
+                  What challenge did you overcome recently?
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Entries -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-clock-history text-gray-600 mr-2"></i>
+              Recent Entries
+            </h3>
+            <div id="recent-entries" class="space-y-3">
+              <p class="text-sm text-gray-500 italic">
+                No entries yet. Start writing to see your history!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    loadRecentEntries();
+    updateStats();
+
+    // Handle mood selection
+    document.querySelectorAll(".mood-option").forEach((option) => {
+      option.addEventListener("click", function () {
+        document.querySelectorAll(".mood-option").forEach((opt) => {
+          opt.classList.remove("border-blue-500", "bg-blue-50");
+          opt.classList.add("border-gray-200");
+        });
+        this.classList.remove("border-gray-200");
+        this.classList.add("border-blue-500", "bg-blue-50");
+      });
+    });
+
+    // Handle range sliders
+    const anxietySlider = document.getElementById("anxiety-level");
+    const stressSlider = document.getElementById("stress-level");
+    const anxietyValue = document.getElementById("anxiety-value");
+    const stressValue = document.getElementById("stress-value");
+
+    anxietySlider.addEventListener("input", function () {
+      anxietyValue.textContent = this.value;
+    });
+
+    stressSlider.addEventListener("input", function () {
+      stressValue.textContent = this.value;
+    });
+
+    // Character counter
+    const textarea = document.getElementById("journal-content");
+    const charCount = document.getElementById("char-count");
+
+    textarea.addEventListener("input", function () {
+      charCount.textContent = this.value.length;
+    });
+
+    // Handle form submission
+    document
+      .getElementById("journal-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        saveJournalEntry();
+      });
+  });
+
+  function saveJournalEntry() {
+    const form = document.getElementById("journal-form");
+    const formData = new FormData(form);
+
+    const entry = {
+      mood: formData.get("mood"),
+      anxietyLevel: formData.get("anxiety-level"),
+      stressLevel: formData.get("stress-level"),
+      title: formData.get("title"),
+      content: formData.get("content"),
+      helpfulActivities: formData.getAll("helpful-activities"),
+    };
+
+    if (!entry.mood || !entry.content.trim()) {
+      alert("Please select your mood and write something in your journal.");
+      return;
+    }
+
+    fetch("/save_journal", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(entry),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Show success message
+          showSuccessMessage();
+          // Reset form
+          form.reset();
+          document.getElementById("char-count").textContent = "0";
+          document.getElementById("anxiety-value").textContent = "5";
+          document.getElementById("stress-value").textContent = "5";
+          // Reset mood selection
+          document.querySelectorAll(".mood-option").forEach((opt) => {
+            opt.classList.remove("border-blue-500", "bg-blue-50");
+            opt.classList.add("border-gray-200");
+          });
+          // Reload recent entries
+          loadRecentEntries();
+          updateStats();
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while saving your entry. Please try again.");
+      });
+  }
+
+  function loadRecentEntries() {
+    fetch("/get_journal_entries")
+      .then((response) => response.json())
+      .then((entries) => {
+        const recentEntriesDiv = document.getElementById("recent-entries");
+
+        if (entries.length === 0) {
+          recentEntriesDiv.innerHTML =
+            '<p class="text-sm text-gray-500 italic">No entries yet. Start writing to see your history!</p>';
+          return;
+        }
+
+        const recentEntries = entries.slice(-5).reverse();
+        recentEntriesDiv.innerHTML = recentEntries
+          .map((entry) => {
+            const date = new Date(entry.timestamp).toLocaleDateString();
+            const moodEmoji = getMoodEmoji(entry.mood);
+            return `
+                <div class="p-3 bg-gray-50 rounded-lg border-l-4 border-blue-400">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">${date}</span>
+                        <span class="text-lg">${moodEmoji}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-800">${
+                      entry.title || "Untitled Entry"
+                    }</p>
+                    <p class="text-xs text-gray-600 mt-1">${entry.content.substring(
+                      0,
+                      60
+                    )}${entry.content.length > 60 ? "..." : ""}</p>
+                </div>
+            `;
+          })
+          .join("");
+      });
+  }
+
+  function updateStats() {
+    fetch("/get_journal_entries")
+      .then((response) => response.json())
+      .then((entries) => {
+        // Update weekly entries
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const weeklyEntries = entries.filter(
+          (entry) => new Date(entry.timestamp) > oneWeekAgo
+        ).length;
+
+        document.getElementById("weekly-entries").textContent = weeklyEntries;
+
+        // Calculate average mood
+        if (entries.length > 0) {
+          const moodValues = {
+            "very-sad": 1,
+            sad: 2,
+            neutral: 3,
+            happy: 4,
+            "very-happy": 5,
+          };
+          const avgMood =
+            entries.reduce(
+              (sum, entry) => sum + (moodValues[entry.mood] || 3),
+              0
+            ) / entries.length;
+          const avgMoodText =
+            Object.keys(moodValues).find(
+              (key) => moodValues[key] === Math.round(avgMood)
+            ) || "neutral";
+          document.getElementById("average-mood").textContent =
+            avgMoodText.replace("-", " ");
+        }
+
+        // Calculate streak
+        let streak = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < 30; i++) {
+          const checkDate = new Date(today);
+          checkDate.setDate(checkDate.getDate() - i);
+
+          const hasEntry = entries.some((entry) => {
+            const entryDate = new Date(entry.timestamp);
+            entryDate.setHours(0, 0, 0, 0);
+            return entryDate.getTime() === checkDate.getTime();
+          });
+
+          if (hasEntry) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+
+        document.getElementById("streak-days").textContent = `${streak} days`;
+      });
+  }
+
+  function getMoodEmoji(mood) {
+    const moodEmojis = {
+      "very-sad": "😢",
+      sad: "😕",
+      neutral: "😐",
+      happy: "😊",
+      "very-happy": "😄",
+    };
+    return moodEmojis[mood] || "😐";
+  }
+
+  function showSuccessMessage() {
+    const successDiv = document.createElement("div");
+    successDiv.className =
+      "fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50";
+    successDiv.innerHTML =
+      '<i class="bi bi-check-circle mr-2"></i>Journal entry saved successfully!';
+    document.body.appendChild(successDiv);
+
+    setTimeout(() => {
+      successDiv.remove();
+    }, 3000);
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,689 @@
+{% extends "base_new.html" %} {% block title %}Breathing Exercises - UniCare{%
+endblock %} {% block content %}
+<section class="py-16 bg-gradient-to-br from-teal-50 to-blue-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">Breathing Exercises</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Learn and practice various breathing techniques to manage anxiety,
+        reduce stress, and improve your overall mental well-being.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- Interactive Breathing Exercise -->
+      <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          <i class="bi bi-wind text-teal-600 mr-2"></i>
+          Guided Breathing Exercise
+        </h2>
+
+        <!-- Breathing Circle -->
+        <div class="relative w-80 h-80 mx-auto mb-8">
+          <div
+            id="breathing-circle"
+            class="w-full h-full rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center transition-all duration-1000 ease-in-out shadow-lg"
+          >
+            <div class="text-center text-white">
+              <div class="text-2xl font-bold mb-2" id="breathing-text">
+                Click Start
+              </div>
+              <div class="text-sm opacity-90" id="breathing-instruction">
+                to begin
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3"
+            >Choose Exercise:</label
+          >
+          <div class="grid grid-cols-1 gap-3">
+            <label
+              class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-teal-300 transition duration-300"
+            >
+              <input
+                type="radio"
+                name="exercise-type"
+                value="4-7-8"
+                class="text-teal-600 mr-3"
+                checked
+              />
+              <div>
+                <div class="font-semibold text-gray-800">4-7-8 Technique</div>
+                <div class="text-sm text-gray-600">
+                  Inhale 4, Hold 7, Exhale 8 (Great for anxiety)
+                </div>
+              </div>
+            </label>
+
+            <label
+              class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-teal-300 transition duration-300"
+            >
+              <input
+                type="radio"
+                name="exercise-type"
+                value="box"
+                class="text-teal-600 mr-3"
+              />
+              <div>
+                <div class="font-semibold text-gray-800">Box Breathing</div>
+                <div class="text-sm text-gray-600">
+                  Inhale 4, Hold 4, Exhale 4, Hold 4 (For focus)
+                </div>
+              </div>
+            </label>
+
+            <label
+              class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-teal-300 transition duration-300"
+            >
+              <input
+                type="radio"
+                name="exercise-type"
+                value="coherent"
+                class="text-teal-600 mr-3"
+              />
+              <div>
+                <div class="font-semibold text-gray-800">
+                  Coherent Breathing
+                </div>
+                <div class="text-sm text-gray-600">
+                  Inhale 5, Exhale 5 (For relaxation)
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="text-center">
+          <button
+            id="start-breathing"
+            class="bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-teal-700 transition duration-300 mr-4"
+          >
+            <i class="bi bi-play-fill mr-2"></i>Start
+          </button>
+          <button
+            id="stop-breathing"
+            class="bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-600 transition duration-300"
+            disabled
+          >
+            <i class="bi bi-stop-fill mr-2"></i>Stop
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div class="mt-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Session Progress</div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div
+              class="bg-teal-600 h-2 rounded-full transition-all duration-300"
+              style="width: 0%"
+              id="session-progress"
+            ></div>
+          </div>
+          <div class="mt-2 text-sm text-gray-600">
+            <span id="current-cycle">0</span> /
+            <span id="total-cycles">10</span> cycles
+          </div>
+        </div>
+      </div>
+
+      <!-- Information Panel -->
+      <div class="space-y-6">
+        <!-- Current Exercise Info -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="bi bi-info-circle text-blue-600 mr-2"></i>
+            Exercise Benefits
+          </h3>
+          <div id="exercise-info">
+            <div class="space-y-4">
+              <div class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-3 mt-1"></i>
+                <div>
+                  <div class="font-semibold text-gray-800">Reduces Anxiety</div>
+                  <div class="text-sm text-gray-600">
+                    Activates the parasympathetic nervous system
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-3 mt-1"></i>
+                <div>
+                  <div class="font-semibold text-gray-800">Improves Focus</div>
+                  <div class="text-sm text-gray-600">
+                    Helps calm racing thoughts
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-3 mt-1"></i>
+                <div>
+                  <div class="font-semibold text-gray-800">
+                    Lowers Blood Pressure
+                  </div>
+                  <div class="text-sm text-gray-600">
+                    Promotes cardiovascular health
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Statistics -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="bi bi-graph-up text-purple-600 mr-2"></i>
+            Your Progress
+          </h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-center p-4 bg-blue-50 rounded-lg">
+              <div class="text-2xl font-bold text-blue-600" id="sessions-today">
+                0
+              </div>
+              <div class="text-sm text-gray-600">Sessions Today</div>
+            </div>
+            <div class="text-center p-4 bg-green-50 rounded-lg">
+              <div
+                class="text-2xl font-bold text-green-600"
+                id="total-sessions"
+              >
+                0
+              </div>
+              <div class="text-sm text-gray-600">Total Sessions</div>
+            </div>
+            <div class="text-center p-4 bg-purple-50 rounded-lg">
+              <div class="text-2xl font-bold text-purple-600" id="streak-days">
+                0
+              </div>
+              <div class="text-sm text-gray-600">Day Streak</div>
+            </div>
+            <div class="text-center p-4 bg-orange-50 rounded-lg">
+              <div
+                class="text-2xl font-bold text-orange-600"
+                id="total-minutes"
+              >
+                0
+              </div>
+              <div class="text-sm text-gray-600">Total Minutes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Tips -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="bi bi-lightbulb text-yellow-600 mr-2"></i>
+            Tips for Success
+          </h3>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start">
+              <i class="bi bi-arrow-right text-teal-600 mr-2 mt-1"></i>
+              <span>Find a quiet, comfortable place to practice</span>
+            </li>
+            <li class="flex items-start">
+              <i class="bi bi-arrow-right text-teal-600 mr-2 mt-1"></i>
+              <span>Practice at the same time each day</span>
+            </li>
+            <li class="flex items-start">
+              <i class="bi bi-arrow-right text-teal-600 mr-2 mt-1"></i>
+              <span>Start with shorter sessions and gradually increase</span>
+            </li>
+            <li class="flex items-start">
+              <i class="bi bi-arrow-right text-teal-600 mr-2 mt-1"></i>
+              <span>Focus on the rhythm, not perfection</span>
+            </li>
+            <li class="flex items-start">
+              <i class="bi bi-arrow-right text-teal-600 mr-2 mt-1"></i>
+              <span>Use during stressful moments for quick relief</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Breathing Techniques -->
+    <div
+      class="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl text-white p-8"
+    >
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-4">Emergency Techniques</h2>
+        <p class="text-xl opacity-90">
+          Quick breathing exercises for immediate stress relief
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
+          <i class="bi bi-lightning text-4xl mb-4"></i>
+          <h3 class="text-lg font-semibold mb-2">30-Second Reset</h3>
+          <p class="text-sm opacity-90 mb-4">
+            Quick technique for immediate anxiety relief
+          </p>
+          <button
+            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
+            data-type="emergency"
+          >
+            Try Now
+          </button>
+        </div>
+
+        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
+          <i class="bi bi-heart-pulse text-4xl mb-4"></i>
+          <h3 class="text-lg font-semibold mb-2">Panic Attack Relief</h3>
+          <p class="text-sm opacity-90 mb-4">
+            Specialized breathing for panic episodes
+          </p>
+          <button
+            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
+            data-type="panic"
+          >
+            Try Now
+          </button>
+        </div>
+
+        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
+          <i class="bi bi-moon text-4xl mb-4"></i>
+          <h3 class="text-lg font-semibold mb-2">Sleep Preparation</h3>
+          <p class="text-sm opacity-90 mb-4">
+            Calming breath work for better sleep
+          </p>
+          <button
+            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
+            data-type="sleep"
+          >
+            Try Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  class BreathingExercise {
+    constructor() {
+      this.isActive = false;
+      this.currentCycle = 0;
+      this.totalCycles = 10;
+      this.currentPhase = "";
+      this.phaseTimer = null;
+      this.sessionTimer = null;
+
+      this.exercises = {
+        "4-7-8": {
+          phases: [
+            {
+              name: "Inhale",
+              duration: 4,
+              instruction: "Breathe in slowly through your nose",
+            },
+            {
+              name: "Hold",
+              duration: 7,
+              instruction: "Hold your breath gently",
+            },
+            {
+              name: "Exhale",
+              duration: 8,
+              instruction: "Exhale slowly through your mouth",
+            },
+          ],
+          totalTime: 19,
+        },
+        box: {
+          phases: [
+            { name: "Inhale", duration: 4, instruction: "Breathe in slowly" },
+            { name: "Hold", duration: 4, instruction: "Hold your breath" },
+            { name: "Exhale", duration: 4, instruction: "Breathe out slowly" },
+            { name: "Hold", duration: 4, instruction: "Hold empty lungs" },
+          ],
+          totalTime: 16,
+        },
+        coherent: {
+          phases: [
+            {
+              name: "Inhale",
+              duration: 5,
+              instruction: "Breathe in slowly and deeply",
+            },
+            {
+              name: "Exhale",
+              duration: 5,
+              instruction: "Breathe out slowly and completely",
+            },
+          ],
+          totalTime: 10,
+        },
+      };
+
+      this.init();
+    }
+
+    init() {
+      this.loadStats();
+      this.bindEvents();
+      this.updateExerciseInfo();
+    }
+
+    bindEvents() {
+      document
+        .getElementById("start-breathing")
+        .addEventListener("click", () => this.startExercise());
+      document
+        .getElementById("stop-breathing")
+        .addEventListener("click", () => this.stopExercise());
+
+      document
+        .querySelectorAll('input[name="exercise-type"]')
+        .forEach((radio) => {
+          radio.addEventListener("change", () => this.updateExerciseInfo());
+        });
+
+      document.querySelectorAll(".emergency-breath").forEach((btn) => {
+        btn.addEventListener("click", (e) =>
+          this.startEmergencyExercise(e.target.dataset.type)
+        );
+      });
+    }
+
+    startExercise() {
+      if (this.isActive) return;
+
+      this.isActive = true;
+      this.currentCycle = 0;
+
+      document.getElementById("start-breathing").disabled = true;
+      document.getElementById("stop-breathing").disabled = false;
+
+      this.runCycle();
+    }
+
+    stopExercise() {
+      this.isActive = false;
+
+      if (this.phaseTimer) clearTimeout(this.phaseTimer);
+      if (this.sessionTimer) clearTimeout(this.sessionTimer);
+
+      document.getElementById("start-breathing").disabled = false;
+      document.getElementById("stop-breathing").disabled = true;
+
+      document.getElementById("breathing-text").textContent =
+        "Exercise Stopped";
+      document.getElementById("breathing-instruction").textContent =
+        "Click start to begin again";
+
+      this.resetCircle();
+      this.updateStats();
+    }
+
+    runCycle() {
+      if (!this.isActive || this.currentCycle >= this.totalCycles) {
+        this.completeSession();
+        return;
+      }
+
+      this.currentCycle++;
+      document.getElementById("current-cycle").textContent = this.currentCycle;
+
+      const exerciseType = document.querySelector(
+        'input[name="exercise-type"]:checked'
+      ).value;
+      const exercise = this.exercises[exerciseType];
+
+      this.runPhases(exercise.phases, 0);
+
+      const progress = (this.currentCycle / this.totalCycles) * 100;
+      document.getElementById("session-progress").style.width = progress + "%";
+    }
+
+    runPhases(phases, phaseIndex) {
+      if (!this.isActive || phaseIndex >= phases.length) {
+        setTimeout(() => this.runCycle(), 500);
+        return;
+      }
+
+      const phase = phases[phaseIndex];
+      this.currentPhase = phase.name;
+
+      document.getElementById("breathing-text").textContent = phase.name;
+      document.getElementById("breathing-instruction").textContent =
+        phase.instruction;
+
+      this.animateCircle(phase.name, phase.duration);
+
+      this.phaseTimer = setTimeout(() => {
+        this.runPhases(phases, phaseIndex + 1);
+      }, phase.duration * 1000);
+    }
+
+    animateCircle(phase, duration) {
+      const circle = document.getElementById("breathing-circle");
+
+      if (phase === "Inhale") {
+        circle.style.transform = "scale(1.3)";
+        circle.style.backgroundColor = "#14b8a6"; // teal-500
+      } else if (phase === "Exhale") {
+        circle.style.transform = "scale(0.8)";
+        circle.style.backgroundColor = "#3b82f6"; // blue-500
+      } else {
+        circle.style.transform = "scale(1.1)";
+        circle.style.backgroundColor = "#8b5cf6"; // purple-500
+      }
+
+      circle.style.transition = `all ${duration}s ease-in-out`;
+    }
+
+    resetCircle() {
+      const circle = document.getElementById("breathing-circle");
+      circle.style.transform = "scale(1)";
+      circle.style.backgroundColor = "#14b8a6";
+      circle.style.transition = "all 0.5s ease-in-out";
+    }
+
+    completeSession() {
+      this.isActive = false;
+
+      document.getElementById("breathing-text").textContent =
+        "Session Complete!";
+      document.getElementById("breathing-instruction").textContent =
+        "Well done! Take a moment to notice how you feel";
+
+      document.getElementById("start-breathing").disabled = false;
+      document.getElementById("stop-breathing").disabled = true;
+
+      this.resetCircle();
+      this.saveSession();
+      this.updateStats();
+
+      // Reset for next session
+      setTimeout(() => {
+        this.currentCycle = 0;
+        document.getElementById("current-cycle").textContent = "0";
+        document.getElementById("session-progress").style.width = "0%";
+        document.getElementById("breathing-text").textContent = "Click Start";
+        document.getElementById("breathing-instruction").textContent =
+          "to begin";
+      }, 3000);
+    }
+
+    startEmergencyExercise(type) {
+      // Stop current exercise if running
+      if (this.isActive) {
+        this.stopExercise();
+      }
+
+      // Set appropriate exercise type
+      if (type === "emergency" || type === "panic") {
+        document.querySelector('input[value="4-7-8"]').checked = true;
+      } else if (type === "sleep") {
+        document.querySelector('input[value="coherent"]').checked = true;
+      }
+
+      this.totalCycles = 5; // Shorter emergency session
+      document.getElementById("total-cycles").textContent = this.totalCycles;
+
+      this.updateExerciseInfo();
+      this.startExercise();
+    }
+
+    updateExerciseInfo() {
+      const exerciseType = document.querySelector(
+        'input[name="exercise-type"]:checked'
+      ).value;
+      const infoDiv = document.getElementById("exercise-info");
+
+      const info = {
+        "4-7-8": {
+          title: "4-7-8 Breathing",
+          benefits: [
+            {
+              icon: "bi-heart-pulse",
+              title: "Reduces Anxiety",
+              desc: "Activates parasympathetic nervous system",
+            },
+            {
+              icon: "bi-moon",
+              title: "Promotes Sleep",
+              desc: "Natural sedative effect on the nervous system",
+            },
+            {
+              icon: "bi-shield-check",
+              title: "Stress Relief",
+              desc: "Quickly calms the mind and body",
+            },
+          ],
+        },
+        box: {
+          title: "Box Breathing",
+          benefits: [
+            {
+              icon: "bi-bullseye",
+              title: "Improves Focus",
+              desc: "Enhances concentration and mental clarity",
+            },
+            {
+              icon: "bi-graph-up",
+              title: "Increases Performance",
+              desc: "Used by athletes and military personnel",
+            },
+            {
+              icon: "bi-balance",
+              title: "Emotional Balance",
+              desc: "Helps regulate emotional responses",
+            },
+          ],
+        },
+        coherent: {
+          title: "Coherent Breathing",
+          benefits: [
+            {
+              icon: "bi-heart",
+              title: "Heart Rate Variability",
+              desc: "Improves heart rhythm coherence",
+            },
+            {
+              icon: "bi-flower1",
+              title: "Deep Relaxation",
+              desc: "Promotes profound state of calm",
+            },
+            {
+              icon: "bi-brightness-high",
+              title: "Mental Clarity",
+              desc: "Enhances cognitive function",
+            },
+          ],
+        },
+      };
+
+      const exerciseInfo = info[exerciseType];
+      infoDiv.innerHTML = `
+            <div class="space-y-4">
+                ${exerciseInfo.benefits
+                  .map(
+                    (benefit) => `
+                    <div class="flex items-start">
+                        <i class="${benefit.icon} text-green-500 mr-3 mt-1"></i>
+                        <div>
+                            <div class="font-semibold text-gray-800">${benefit.title}</div>
+                            <div class="text-sm text-gray-600">${benefit.desc}</div>
+                        </div>
+                    </div>
+                `
+                  )
+                  .join("")}
+            </div>
+        `;
+    }
+
+    saveSession() {
+      const today = new Date().toDateString();
+      let stats = JSON.parse(localStorage.getItem("breathing-stats")) || {
+        sessionsToday: 0,
+        totalSessions: 0,
+        streakDays: 0,
+        totalMinutes: 0,
+        lastSessionDate: null,
+      };
+
+      // Check if this is the first session today
+      if (stats.lastSessionDate !== today) {
+        if (
+          stats.lastSessionDate ===
+          new Date(Date.now() - 86400000).toDateString()
+        ) {
+          stats.streakDays++;
+        } else {
+          stats.streakDays = 1;
+        }
+        stats.sessionsToday = 0;
+      }
+
+      stats.sessionsToday++;
+      stats.totalSessions++;
+      stats.totalMinutes += Math.round(this.totalCycles * 0.3); // Approximate minutes
+      stats.lastSessionDate = today;
+
+      localStorage.setItem("breathing-stats", JSON.stringify(stats));
+    }
+
+    loadStats() {
+      const stats = JSON.parse(localStorage.getItem("breathing-stats")) || {
+        sessionsToday: 0,
+        totalSessions: 0,
+        streakDays: 0,
+        totalMinutes: 0,
+      };
+
+      this.updateStats(stats);
+    }
+
+    updateStats(stats = null) {
+      if (!stats) {
+        stats = JSON.parse(localStorage.getItem("breathing-stats")) || {
+          sessionsToday: 0,
+          totalSessions: 0,
+          streakDays: 0,
+          totalMinutes: 0,
+        };
+      }
+
+      document.getElementById("sessions-today").textContent =
+        stats.sessionsToday;
+      document.getElementById("total-sessions").textContent =
+        stats.totalSessions;
+      document.getElementById("streak-days").textContent = stats.streakDays;
+      document.getElementById("total-minutes").textContent = stats.totalMinutes;
+    }
+  }
+
+  // Initialize breathing exercise when page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    new BreathingExercise();
+  });
+</script>
+{% endblock %}

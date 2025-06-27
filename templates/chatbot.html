@@ -1,0 +1,402 @@
+{% extends "base_new.html" %} {% block title %}AI Psychology Support - UniCare{%
+endblock %} {% block content %}
+<section class="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">
+        AI Psychology Support
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Talk to our AI assistant trained in psychology principles. Get immediate
+        support, coping strategies, and guidance 24/7.
+      </p>
+      <div
+        class="mt-4 p-4 bg-blue-100 rounded-lg border-l-4 border-blue-500 max-w-2xl mx-auto"
+      >
+        <p class="text-sm text-blue-800">
+          <i class="bi bi-info-circle mr-2"></i>
+          This AI assistant provides general support and is not a replacement
+          for professional therapy. In crisis situations, please contact
+          emergency services or a mental health professional.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Chat Interface -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-xl shadow-lg h-[600px] flex flex-col">
+          <!-- Chat Header -->
+          <div class="p-6 border-b border-gray-200 flex items-center">
+            <div
+              class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mr-4"
+            >
+              <i class="bi bi-robot text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800">
+                Dr. AI Assistant
+              </h3>
+              <p class="text-sm text-gray-600">
+                Psychology Support • Always Available
+              </p>
+            </div>
+            <div class="ml-auto flex items-center">
+              <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <span class="text-sm text-gray-600">Online</span>
+            </div>
+          </div>
+
+          <!-- Chat Messages -->
+          <div class="flex-1 p-6 overflow-y-auto" id="chat-messages">
+            <div class="space-y-4">
+              <div class="flex items-start">
+                <div
+                  class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-1"
+                >
+                  <i class="bi bi-robot text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="bg-gray-100 rounded-lg p-4 max-w-md">
+                    <p class="text-gray-800">
+                      Hello! I'm here to support you. I'm an AI assistant
+                      trained in psychology principles and I'm here to listen
+                      and help. How are you feeling today?
+                    </p>
+                  </div>
+                  <span class="text-xs text-gray-500 mt-1 block">Just now</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="p-6 border-t border-gray-200">
+            <form id="chat-form" class="flex space-x-4">
+              <input
+                type="text"
+                id="chat-input"
+                placeholder="Type your message here..."
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                autocomplete="off"
+              />
+              <button
+                type="submit"
+                class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-300"
+              >
+                <i class="bi bi-send"></i>
+              </button>
+            </form>
+            <div class="mt-3 flex flex-wrap gap-2" id="quick-responses">
+              <button
+                class="quick-response-btn bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition duration-300"
+                data-message="I'm feeling anxious"
+              >
+                I'm feeling anxious
+              </button>
+              <button
+                class="quick-response-btn bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition duration-300"
+                data-message="I'm feeling sad"
+              >
+                I'm feeling sad
+              </button>
+              <button
+                class="quick-response-btn bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition duration-300"
+                data-message="I'm stressed"
+              >
+                I'm stressed
+              </button>
+              <button
+                class="quick-response-btn bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition duration-300"
+                data-message="I need help"
+              >
+                I need help
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="space-y-6">
+          <!-- Crisis Resources -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-red-800 mb-4">
+              <i class="bi bi-exclamation-triangle text-red-600 mr-2"></i>
+              Crisis Support
+            </h3>
+            <div class="space-y-3 text-sm">
+              <div>
+                <p class="font-semibold text-red-800">
+                  Suicide & Crisis Lifeline
+                </p>
+                <a href="tel:988" class="text-red-600 hover:text-red-800"
+                  >📞 988</a
+                >
+              </div>
+              <div>
+                <p class="font-semibold text-red-800">Crisis Text Line</p>
+                <p class="text-red-600">Text HOME to 741741</p>
+              </div>
+              <div>
+                <p class="font-semibold text-red-800">Emergency Services</p>
+                <a href="tel:911" class="text-red-600 hover:text-red-800"
+                  >📞 911</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Guidelines -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-chat-dots text-purple-600 mr-2"></i>
+              Chat Guidelines
+            </h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
+                <span>Be honest about your feelings</span>
+              </li>
+              <li class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
+                <span>Take your time to express yourself</span>
+              </li>
+              <li class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
+                <span>Ask for specific coping strategies</span>
+              </li>
+              <li class="flex items-start">
+                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
+                <span>Remember this is a safe space</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Helpful Topics -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-lightbulb text-yellow-600 mr-2"></i>
+              What I Can Help With
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div
+                class="p-2 bg-blue-50 rounded cursor-pointer hover:bg-blue-100 transition duration-300 topic-btn"
+                data-topic="anxiety"
+              >
+                <i class="bi bi-heart-pulse text-blue-600 mr-2"></i>
+                <span class="text-blue-800">Anxiety Management</span>
+              </div>
+              <div
+                class="p-2 bg-green-50 rounded cursor-pointer hover:bg-green-100 transition duration-300 topic-btn"
+                data-topic="stress"
+              >
+                <i class="bi bi-speedometer text-green-600 mr-2"></i>
+                <span class="text-green-800">Stress Relief</span>
+              </div>
+              <div
+                class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100 transition duration-300 topic-btn"
+                data-topic="depression"
+              >
+                <i class="bi bi-cloud-rain text-purple-600 mr-2"></i>
+                <span class="text-purple-800">Depression Support</span>
+              </div>
+              <div
+                class="p-2 bg-orange-50 rounded cursor-pointer hover:bg-orange-100 transition duration-300 topic-btn"
+                data-topic="sleep"
+              >
+                <i class="bi bi-moon text-orange-600 mr-2"></i>
+                <span class="text-orange-800">Sleep Issues</span>
+              </div>
+              <div
+                class="p-2 bg-pink-50 rounded cursor-pointer hover:bg-pink-100 transition duration-300 topic-btn"
+                data-topic="relationships"
+              >
+                <i class="bi bi-people text-pink-600 mr-2"></i>
+                <span class="text-pink-800">Relationships</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="bi bi-lightning text-blue-600 mr-2"></i>
+              Quick Actions
+            </h3>
+            <div class="space-y-3">
+              <a
+                href="{{ url_for('breathing') }}"
+                class="block w-full text-center bg-blue-100 text-blue-800 py-2 px-4 rounded-lg hover:bg-blue-200 transition duration-300"
+              >
+                <i class="bi bi-wind mr-2"></i>Breathing Exercise
+              </a>
+              <a
+                href="{{ url_for('journal') }}"
+                class="block w-full text-center bg-green-100 text-green-800 py-2 px-4 rounded-lg hover:bg-green-200 transition duration-300"
+              >
+                <i class="bi bi-journal-text mr-2"></i>Write in Journal
+              </a>
+              <a
+                href="{{ url_for('games') }}"
+                class="block w-full text-center bg-purple-100 text-purple-800 py-2 px-4 rounded-lg hover:bg-purple-200 transition duration-300"
+              >
+                <i class="bi bi-puzzle mr-2"></i>Play Mental Games
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const chatMessages = document.getElementById("chat-messages");
+
+    // Handle form submission
+    chatForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (message) {
+        sendMessage(message);
+        chatInput.value = "";
+      }
+    });
+
+    // Handle quick response buttons
+    document.querySelectorAll(".quick-response-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const message = this.dataset.message;
+        sendMessage(message);
+      });
+    });
+
+    // Handle topic buttons
+    document.querySelectorAll(".topic-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const topic = this.dataset.topic;
+        const messages = {
+          anxiety: "I would like to learn about managing anxiety",
+          stress: "I need help with stress management",
+          depression: "I am dealing with feelings of depression",
+          sleep: "I am having trouble sleeping",
+          relationships: "I need advice about relationships",
+        };
+        sendMessage(messages[topic]);
+      });
+    });
+
+    // Auto-focus on input
+    chatInput.focus();
+  });
+
+  function sendMessage(message) {
+    // Add user message to chat
+    addMessageToChat(message, "user");
+
+    // Show typing indicator
+    showTypingIndicator();
+
+    // Send message to backend
+    fetch("/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: message }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        hideTypingIndicator();
+        addMessageToChat(data.response, "ai");
+      })
+      .catch((error) => {
+        hideTypingIndicator();
+        console.error("Error:", error);
+        addMessageToChat(
+          "I apologize, but I seem to be having trouble connecting right now. Please try again in a moment.",
+          "ai"
+        );
+      });
+  }
+
+  function addMessageToChat(message, sender) {
+    const chatMessages = document.getElementById("chat-messages");
+    const messageDiv = document.createElement("div");
+    const time = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (sender === "user") {
+      messageDiv.innerHTML = `
+            <div class="flex items-start justify-end">
+                <div class="flex-1 max-w-md">
+                    <div class="bg-purple-600 text-white rounded-lg p-4 ml-auto">
+                        <p>${message}</p>
+                    </div>
+                    <span class="text-xs text-gray-500 mt-1 block text-right">${time}</span>
+                </div>
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center ml-3 mt-1">
+                    <i class="bi bi-person text-white text-sm"></i>
+                </div>
+            </div>
+        `;
+    } else {
+      messageDiv.innerHTML = `
+            <div class="flex items-start">
+                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-1">
+                    <i class="bi bi-robot text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="bg-gray-100 rounded-lg p-4 max-w-md">
+                        <p class="text-gray-800">${message}</p>
+                    </div>
+                    <span class="text-xs text-gray-500 mt-1 block">${time}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    const chatMessages = document.getElementById("chat-messages");
+    const typingDiv = document.createElement("div");
+    typingDiv.id = "typing-indicator";
+    typingDiv.innerHTML = `
+        <div class="flex items-start">
+            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-1">
+                <i class="bi bi-robot text-white text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <div class="bg-gray-100 rounded-lg p-4 max-w-md">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTypingIndicator() {
+    const typingIndicator = document.getElementById("typing-indicator");
+    if (typingIndicator) {
+      typingIndicator.remove();
+    }
+  }
+</script>
+{% endblock %}

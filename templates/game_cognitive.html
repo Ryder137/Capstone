@@ -1,0 +1,421 @@
+{% extends "base_new.html" %} {% block title %}{{ game.name }} - UniCare{% endblock
+%} {% block content %}
+<section class="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-8">
+      <a
+        href="{{ url_for('games') }}"
+        class="inline-flex items-center text-blue-600 hover:text-blue-800 transition duration-300 mb-4"
+      >
+        <i class="bi bi-arrow-left mr-2"></i>Back to Games
+      </a>
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ game.name }}</h1>
+      <p class="text-xl text-gray-600">{{ game.description }}</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+          Word Association Challenge
+        </h2>
+        <p class="text-gray-600">
+          Think of words that relate to the given word. The more creative, the
+          better!
+        </p>
+      </div>
+
+      <div class="max-w-2xl mx-auto">
+        <div
+          class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg p-8 mb-6 text-center"
+        >
+          <div class="text-lg font-semibold text-gray-700 mb-2">
+            Current Word:
+          </div>
+          <div class="text-4xl font-bold text-purple-600" id="current-word">
+            OCEAN
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label
+            for="word-input"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Enter a related word:</label
+          >
+          <div class="flex space-x-4">
+            <input
+              type="text"
+              id="word-input"
+              placeholder="Type your word here..."
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <button
+              id="submit-word"
+              class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-300"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-blue-50 p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-blue-600" id="score">0</div>
+            <div class="text-sm text-gray-600">Score</div>
+          </div>
+          <div class="bg-green-50 p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-green-600" id="words-found">
+              0
+            </div>
+            <div class="text-sm text-gray-600">Words Found</div>
+          </div>
+          <div class="bg-purple-50 p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-purple-600" id="timer">60</div>
+            <div class="text-sm text-gray-600">Time Left</div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Your Words:</h3>
+          <div
+            id="user-words"
+            class="flex flex-wrap gap-2 min-h-[100px] p-4 bg-gray-50 rounded-lg"
+          >
+            <div class="text-gray-500 italic">
+              Your associated words will appear here...
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <button
+            id="new-word"
+            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 mr-4"
+          >
+            New Word
+          </button>
+          <button
+            id="new-game"
+            class="bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-600 transition duration-300"
+          >
+            New Game
+          </button>
+        </div>
+
+        <div id="feedback" class="mt-6 p-4 rounded-lg text-center hidden">
+          <!-- Feedback will be shown here -->
+        </div>
+
+        <!-- Game Over Modal -->
+        <div
+          id="game-over"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+        >
+          <div class="bg-white rounded-xl p-8 max-w-md mx-4">
+            <div class="text-center">
+              <div class="text-6xl mb-4">🧠</div>
+              <h2 class="text-3xl font-bold text-purple-600 mb-4">
+                Time's Up!
+              </h2>
+              <p class="text-xl text-gray-600 mb-6">
+                Great job exercising your cognitive flexibility!
+              </p>
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-purple-50 p-4 rounded-lg">
+                  <div
+                    class="text-2xl font-bold text-purple-600"
+                    id="final-score"
+                  >
+                    0
+                  </div>
+                  <div class="text-sm text-gray-600">Final Score</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <div
+                    class="text-2xl font-bold text-green-600"
+                    id="final-words"
+                  >
+                    0
+                  </div>
+                  <div class="text-sm text-gray-600">Words Found</div>
+                </div>
+              </div>
+              <button
+                id="play-again"
+                class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-300"
+              >
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  class WordAssociation {
+    constructor() {
+      this.words = [
+        "OCEAN",
+        "MOUNTAIN",
+        "FOREST",
+        "CITY",
+        "MUSIC",
+        "BOOK",
+        "FIRE",
+        "STAR",
+        "FLOWER",
+        "RIVER",
+        "CLOUD",
+        "DREAM",
+        "JOURNEY",
+        "FRIEND",
+        "PEACE",
+        "LOVE",
+        "COURAGE",
+        "WISDOM",
+        "FREEDOM",
+        "ADVENTURE",
+        "MAGIC",
+        "RAINBOW",
+        "BRIDGE",
+        "LIGHT",
+      ];
+
+      this.currentWord = "";
+      this.userWords = [];
+      this.score = 0;
+      this.wordsFound = 0;
+      this.timeLeft = 60;
+      this.timer = null;
+      this.gameActive = false;
+
+      this.commonAssociations = {
+        OCEAN: [
+          "water",
+          "blue",
+          "waves",
+          "fish",
+          "salt",
+          "deep",
+          "beach",
+          "sea",
+          "whale",
+          "tide",
+        ],
+        MOUNTAIN: [
+          "high",
+          "peak",
+          "snow",
+          "climb",
+          "rock",
+          "view",
+          "tall",
+          "hill",
+          "summit",
+          "stone",
+        ],
+        FOREST: [
+          "trees",
+          "green",
+          "nature",
+          "wood",
+          "animals",
+          "leaves",
+          "wild",
+          "hiking",
+          "birds",
+          "peaceful",
+        ],
+        MUSIC: [
+          "sound",
+          "song",
+          "melody",
+          "rhythm",
+          "notes",
+          "harmony",
+          "instruments",
+          "dance",
+          "lyrics",
+          "beat",
+        ],
+      };
+
+      this.init();
+    }
+
+    init() {
+      this.newWord();
+      this.bindEvents();
+    }
+
+    bindEvents() {
+      document
+        .getElementById("submit-word")
+        .addEventListener("click", () => this.submitWord());
+      document
+        .getElementById("word-input")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") this.submitWord();
+        });
+      document
+        .getElementById("new-word")
+        .addEventListener("click", () => this.newWord());
+      document
+        .getElementById("new-game")
+        .addEventListener("click", () => this.reset());
+      document.getElementById("play-again").addEventListener("click", () => {
+        document.getElementById("game-over").classList.add("hidden");
+        this.reset();
+      });
+
+      // Auto-focus on input
+      document.getElementById("word-input").focus();
+    }
+
+    newWord() {
+      this.currentWord =
+        this.words[Math.floor(Math.random() * this.words.length)];
+      document.getElementById("current-word").textContent = this.currentWord;
+      this.userWords = [];
+      this.updateWordsDisplay();
+      this.startTimer();
+      this.gameActive = true;
+
+      document.getElementById("word-input").disabled = false;
+      document.getElementById("submit-word").disabled = false;
+      document.getElementById("word-input").focus();
+    }
+
+    startTimer() {
+      if (this.timer) clearInterval(this.timer);
+
+      this.timeLeft = 60;
+      document.getElementById("timer").textContent = this.timeLeft;
+
+      this.timer = setInterval(() => {
+        this.timeLeft--;
+        document.getElementById("timer").textContent = this.timeLeft;
+
+        if (this.timeLeft <= 0) {
+          this.endGame();
+        }
+      }, 1000);
+    }
+
+    submitWord() {
+      if (!this.gameActive) return;
+
+      const input = document.getElementById("word-input");
+      const word = input.value.trim().toLowerCase();
+
+      if (!word) return;
+
+      if (this.userWords.includes(word)) {
+        this.showFeedback("You already entered that word!", "warning");
+        input.value = "";
+        return;
+      }
+
+      if (word === this.currentWord.toLowerCase()) {
+        this.showFeedback("You can't use the same word!", "error");
+        input.value = "";
+        return;
+      }
+
+      // Calculate score based on word length and creativity
+      let points = Math.max(word.length - 2, 1) * 10;
+
+      // Bonus points for less common associations
+      const commonWords = this.commonAssociations[this.currentWord] || [];
+      if (!commonWords.includes(word)) {
+        points += 20; // Creativity bonus
+      }
+
+      this.userWords.push(word);
+      this.score += points;
+      this.wordsFound++;
+
+      this.updateStats();
+      this.updateWordsDisplay();
+      this.showFeedback(`+${points} points! Great association!`, "success");
+
+      input.value = "";
+      input.focus();
+    }
+
+    updateWordsDisplay() {
+      const container = document.getElementById("user-words");
+
+      if (this.userWords.length === 0) {
+        container.innerHTML =
+          '<div class="text-gray-500 italic">Your associated words will appear here...</div>';
+        return;
+      }
+
+      container.innerHTML = this.userWords
+        .map(
+          (word) =>
+            `<span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">${word}</span>`
+        )
+        .join("");
+    }
+
+    updateStats() {
+      document.getElementById("score").textContent = this.score;
+      document.getElementById("words-found").textContent = this.wordsFound;
+    }
+
+    showFeedback(message, type) {
+      const feedback = document.getElementById("feedback");
+      const colors = {
+        success: "bg-green-100 text-green-800",
+        warning: "bg-yellow-100 text-yellow-800",
+        error: "bg-red-100 text-red-800",
+      };
+
+      feedback.className = `mt-6 p-4 rounded-lg text-center ${colors[type]}`;
+      feedback.innerHTML = message;
+      feedback.classList.remove("hidden");
+
+      setTimeout(() => {
+        feedback.classList.add("hidden");
+      }, 2000);
+    }
+
+    endGame() {
+      this.gameActive = false;
+      clearInterval(this.timer);
+
+      document.getElementById("word-input").disabled = true;
+      document.getElementById("submit-word").disabled = true;
+
+      document.getElementById("final-score").textContent = this.score;
+      document.getElementById("final-words").textContent = this.wordsFound;
+      document.getElementById("game-over").classList.remove("hidden");
+    }
+
+    reset() {
+      clearInterval(this.timer);
+      this.score = 0;
+      this.wordsFound = 0;
+      this.userWords = [];
+      this.gameActive = false;
+
+      this.updateStats();
+      this.updateWordsDisplay();
+
+      document.getElementById("timer").textContent = "60";
+      document.getElementById("feedback").classList.add("hidden");
+
+      this.newWord();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    new WordAssociation();
+  });
+</script>
+{% endblock %}
