@@ -3,7 +3,8 @@ import json
 import datetime
 import random
 import os
-from database import Database
+from supabase import create_client, Client
+from config import SUPABASE_URL, SUPABASE_KEY
 import google.generativeai as genai
 
 app = Flask(__name__)

@@ -1,205 +1,121 @@
-import sqlite3
 import os
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from supabase import create_client, Client
+
+from config import SUPABASE_URL, SUPABASE_KEY
 
 class Database:
-    def __init__(self, db_path='unicare.db'):
-        self.db_path = db_path
-        self.init_db()
-    
+    def __init__(self):
+        """Initialize Supabase client"""
+        self.client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
     def init_db(self):
-        """Initialize the database with required tables"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
-        # Users table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP,
-                is_active BOOLEAN DEFAULT 1
-            )
-        ''')
-        
-        # Assessment results table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS assessment_results (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                answers TEXT NOT NULL,
-                total_score INTEGER NOT NULL,
-                level TEXT NOT NULL,
-                recommendation TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # Journal entries table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS journal_entries (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                mood TEXT NOT NULL,
-                anxiety_level INTEGER NOT NULL,
-                stress_level INTEGER NOT NULL,
-                entry_text TEXT,
-                helpful_activities TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # Game scores table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS game_scores (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                game_type TEXT NOT NULL,
-                score INTEGER NOT NULL,
-                level INTEGER DEFAULT 1,
-                duration INTEGER,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # Breathing sessions table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS breathing_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                technique TEXT NOT NULL,
-                duration INTEGER NOT NULL,
-                completed BOOLEAN DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # Chat messages table (for chatbot history)
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS chat_messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                message TEXT NOT NULL,
-                response TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
-    
-    def get_connection(self):
-        """Get database connection"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row  # This enables column access by name
-        return conn
-    
+        """Initialize Supabase tables if they don't exist"""
+        # Supabase tables are created through the Supabase dashboard or API
+        # This method is kept for compatibility but does nothing in Supabase
+        pass
+
     # User management methods
     def create_user(self, name, email, password):
         """Create a new user"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
         password_hash = generate_password_hash(password)
-        
         try:
-            cursor.execute('''
-                INSERT INTO users (name, email, password_hash)
-                VALUES (?, ?, ?)
-            ''', (name, email, password_hash))
-            conn.commit()
-            user_id = cursor.lastrowid
-            conn.close()
-            return user_id
-        except sqlite3.IntegrityError:
-            conn.close()
-            return None  # Email already exists
-    
+            result = self.client.table('users').insert({
+                'name': name,
+                'email': email,
+                'password_hash': password_hash,
+                'created_at': datetime.utcnow().isoformat(),
+                'is_active': True
+            }).execute()
+            return result.data[0]['id']
+        except Exception as e:
+            print(f"Error creating user: {str(e)}")
+            return None
+
     def get_user_by_email(self, email):
         """Get user by email"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
-        user = cursor.fetchone()
-        conn.close()
-        
-        return dict(user) if user else None
-    
+        try:
+            result = self.client.table('users').select('*').eq('email', email).execute()
+            return result.data[0] if result.data else None
+        except Exception as e:
+            print(f"Error getting user by email: {str(e)}")
+            return None
+
     def get_user_by_id(self, user_id):
         """Get user by ID"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
-        user = cursor.fetchone()
-        conn.close()
-        
-        return dict(user) if user else None
-    
+        try:
+            result = self.client.table('users').select('*').eq('id', user_id).execute()
+            return result.data[0] if result.data else None
+        except Exception as e:
+            print(f"Error getting user by ID: {str(e)}")
+            return None
+
     def verify_password(self, email, password):
         """Verify user password"""
         user = self.get_user_by_email(email)
         if user and check_password_hash(user['password_hash'], password):
             return user
         return None
-    
+
     def update_last_login(self, user_id):
         """Update user's last login time"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?
-        ''', (user_id,))
-        conn.commit()
-        conn.close()
-    
+        try:
+            self.client.table('users').update({
+                'last_login': datetime.utcnow().isoformat()
+            }).eq('id', user_id).execute()
+        except Exception as e:
+            print(f"Error updating last login: {str(e)}")
+
     # Assessment methods
     def save_assessment_result(self, user_id, answers, total_score, level, recommendation):
         """Save assessment result"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            INSERT INTO assessment_results (user_id, answers, total_score, level, recommendation)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (user_id, str(answers), total_score, level, recommendation))
-        conn.commit()
-        conn.close()
-        
-        return cursor.lastrowid
-    
+        try:
+            result = self.client.table('assessment_results').insert({
+                'user_id': user_id,
+                'answers': str(answers),
+                'total_score': total_score,
+                'level': level,
+                'recommendation': recommendation,
+                'created_at': datetime.utcnow().isoformat()
+            }).execute()
+            return result.data[0]['id']
+        except Exception as e:
+            print(f"Error saving assessment result: {str(e)}")
+            return None
+
     def get_user_assessments(self, user_id, limit=10):
         """Get user's assessment history"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            SELECT * FROM assessment_results 
-            WHERE user_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT ?
-        ''', (user_id, limit))
-        assessments = cursor.fetchall()
-        conn.close()
-        
-        return [dict(assessment) for assessment in assessments]
-    
+        try:
+            result = self.client.table('assessment_results') \
+                .select('*') \
+                .eq('user_id', user_id) \
+                .order('created_at', desc=True) \
+                .limit(limit) \
+                .execute()
+            return result.data
+        except Exception as e:
+            print(f"Error getting user assessments: {str(e)}")
+            return []
+
     # Journal methods
     def save_journal_entry(self, user_id, mood, anxiety_level, stress_level, entry_text, helpful_activities):
         """Save journal entry"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
+        try:
+            result = self.client.table('journal_entries').insert({
+                'user_id': user_id,
+                'mood': mood,
+                'anxiety_level': anxiety_level,
+                'stress_level': stress_level,
+                'entry_text': entry_text,
+                'helpful_activities': str(helpful_activities),
+                'created_at': datetime.utcnow().isoformat()
+            }).execute()
+            return result.data[0]['id']
+        except Exception as e:
+            print(f"Error saving journal entry: {str(e)}")
+            return None
+
         
         cursor.execute('''
             INSERT INTO journal_entries (user_id, mood, anxiety_level, stress_level, entry_text, helpful_activities)
