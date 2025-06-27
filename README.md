@@ -15,18 +15,21 @@ A Flask-based mental health support platform that provides users with various to
 
 ## Deployment
 
-This application is deployed on Vercel. Follow these steps to deploy your own instance:
+This application can be deployed on Heroku. Follow these steps to deploy your own instance:
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
 2. Copy your Supabase URL and anon key
-3. Create a new project on Vercel:
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Connect your GitHub repository
-4. In Vercel dashboard, add environment variables:
+3. Create a new Heroku app:
+   - Go to [heroku.com](https://heroku.com)
+   - Click "New" -> "Create new app"
+   - Choose a unique app name
+4. In Heroku dashboard, add environment variables:
    - `SUPABASE_URL`: Your Supabase project URL
    - `SUPABASE_KEY`: Your Supabase anon key
-5. Deploy the project
+5. Deploy the application:
+   - Connect your GitHub repository
+   - Enable automatic deploys from your main branch
+   - Click "Deploy"
 
 ## Local Development
 
