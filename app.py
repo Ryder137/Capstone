@@ -6,25 +6,23 @@ import os
 from supabase import create_client, Client
 from config import SUPABASE_URL, SUPABASE_KEY
 import google.generativeai as genai
+from database import Database
 
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 
-# Configure your API key
-genai.configure(api_key="AIzaSyBsGyRDXKX5X1tmi3Tf8VrjyucqU6NgRkw")
+# Initialize Supabase client
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Initialize the model (you can switch to 'gemini-pro' or 'gemini-1.5-flash' to avoid quota issues)
-model = genai.GenerativeModel("gemini-1.5-pro")
-
-# Set system instructions (this is like telling the AI how to behave)
-chat = model.start_chat(
-    system_instruction="You are a friendly mental health chatbot that responds briefly, empathetically, and uses easy-to-understand language."
-)
-
-
-
-# Initialize database
-db = Database()
+# Test Supabase connection
+def test_supabase_connection():
+    try:
+        # Test by querying the users table
+        result = supabase.table('users').select('*').limit(1).execute()
+        return True, result.data
+    except Exception as e:
+        return False, str(e)
 
 # Sample data for doctors (keeping existing data structure)
 doctors_data = [
@@ -156,6 +154,23 @@ def login_post():
     else:
         flash('Invalid email or password.', 'error')
         return redirect(url_for('login'))
+
+@app.route('/test-supabase')
+def test_supabase():
+    """Test Supabase connection"""
+    try:
+        # Test by querying the users table
+        result = supabase.table('users').select('*').limit(1).execute()
+        return jsonify({
+            'status': 'success',
+            'message': 'Connected to Supabase successfully!',
+            'data': result.data
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Supabase connection failed: {str(e)}'
+        }), 500
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
