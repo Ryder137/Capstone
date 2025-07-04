@@ -1,30 +1,45 @@
 import json
 import os
 from supabase import create_client
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 # Initialize Supabase client
 supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
 
+# Serve static files from templates directory
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def catch_all(path):
-    return jsonify({"error": "Not Found"}), 404
+def serve_static(path):
+    try:
+        logger.info(f"Serving static file: {path}")
+        return send_from_directory('../templates', path)
+    except Exception as e:
+        logger.error(f"Error serving static file: {str(e)}")
+        return jsonify({"error": "File not found"}), 404
 
 @app.route('/api/test', methods=['GET'])
 def test_supabase():
     try:
+        logger.info("Testing Supabase connection")
         # Test by querying the users table
         result = supabase.table('users').select('*').limit(1).execute()
+        logger.info("Supabase test successful")
         return jsonify({"success": True, "data": result.data})
     except Exception as e:
+        logger.error(f"Supabase test failed: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
     try:
+        logger.info("Processing login request")
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
@@ -32,16 +47,29 @@ def login():
         # Your login logic here
         return jsonify({"success": True})
     except Exception as e:
+        logger.error(f"Login failed: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
     try:
+        logger.info("Processing signup request")
         data = request.get_json()
         # Your signup logic here
         return jsonify({"success": True})
     except Exception as e:
+        logger.error(f"Signup failed: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.errorhandler(404)
+def not_found(e):
+    logger.error(f"404 error: {str(e)}")
+    return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    logger.error(f"500 error: {str(e)}")
+    return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
