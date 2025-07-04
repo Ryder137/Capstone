@@ -10,8 +10,48 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Initialize Supabase client
-supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
+# Check environment variables at startup
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    logger.error("Missing required environment variables")
+    if not SUPABASE_URL:
+        logger.error("SUPABASE_URL is not set")
+    if not SUPABASE_KEY:
+        logger.error("SUPABASE_KEY is not set")
+    
+    @app.route('/api/test', methods=['GET'])
+    def test_supabase():
+        return jsonify({
+            "success": False,
+            "error": "Missing required environment variables",
+            "details": {
+                "SUPABASE_URL": "Set in Vercel environment variables",
+                "SUPABASE_KEY": "Set in Vercel environment variables"
+            }
+        }), 500
+    
+    # Initialize with dummy client to prevent immediate failure
+    supabase = create_client("", "")
+else:
+    # Initialize Supabase client
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        logger.info(f"Supabase client initialized with URL: {SUPABASE_URL}")
+    except Exception as e:
+        logger.error(f"Failed to initialize Supabase client: {str(e)}")
+        
+        @app.route('/api/test', methods=['GET'])
+        def test_supabase():
+            return jsonify({
+                "success": False,
+                "error": "Failed to initialize Supabase client",
+                "details": str(e)
+            }), 500
+        
+        # Initialize with dummy client to prevent immediate failure
+        supabase = create_client("", "")
 
 # Serve static files from templates directory
 @app.route('/', defaults={'path': ''})
