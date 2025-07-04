@@ -12,8 +12,12 @@
       "dest": "api/index.py"
     },
     {
+      "src": "/",
+      "dest": "api/index.py"
+    },
+    {
       "src": "/(.*)",
-      "dest": "templates/$1"
+      "dest": "api/index.py"
     }
   ],
   "env": {

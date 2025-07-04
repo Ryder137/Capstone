@@ -59,7 +59,21 @@ else:
 def serve_static(path):
     try:
         logger.info(f"Serving static file: {path}")
-        return send_from_directory('../templates', path)
+        
+        # First try to serve from templates directory
+        try:
+            return send_from_directory('../templates', path)
+        except Exception as e:
+            logger.error(f"Error serving from templates: {str(e)}")
+            
+        # If not found in templates, try static directory
+        try:
+            return send_from_directory('../static', path)
+        except Exception as e:
+            logger.error(f"Error serving from static: {str(e)}")
+            
+        # If not found in either directory, return 404
+        return jsonify({"error": "File not found"}), 404
     except Exception as e:
         logger.error(f"Error serving static file: {str(e)}")
         return jsonify({"error": "File not found"}), 404
