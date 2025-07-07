@@ -1,0 +1,35 @@
+{% extends "base_new.html" %}
+{% block title %}Manage Users - UniCare{% endblock %}
+{% block content %}
+<section class="py-8 max-w-3xl mx-auto">
+  <h2 class="text-2xl font-bold mb-6">User Management</h2>
+  <table class="min-w-full bg-white rounded shadow-md">
+    <thead>
+      <tr>
+        <th class="py-2 px-4 border-b">Email</th>
+        <th class="py-2 px-4 border-b">Admin</th>
+        <th class="py-2 px-4 border-b">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td class="py-2 px-4 border-b">{{ user.email }}</td>
+        <td class="py-2 px-4 border-b">{{ 'Yes' if user.is_admin else 'No' }}</td>
+        <td class="py-2 px-4 border-b">
+          {% if not user.is_admin %}
+          <form method="POST" action="{{ url_for('set_admin', user_id=user.id) }}" style="display:inline;">
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">Make Admin</button>
+          </form>
+          {% else %}
+          <form method="POST" action="{{ url_for('unset_admin', user_id=user.id) }}" style="display:inline;">
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">Remove Admin</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -14,6 +14,33 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-lg p-8">
+      <!-- Level Selection Dropdown -->
+      <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-2">
+          <label for="level-select" class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+            <i class="bi bi-bar-chart-steps text-orange-500 text-lg"></i>Start at Level:
+          </label>
+          <select id="level-select" class="border-2 border-orange-300 shadow-sm rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500 hover:border-orange-500 transition duration-200 bg-white font-semibold">
+            <option value="1">1 (Easy)</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5 (Moderate)</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10 (Hard)</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13 (Expert)</option>
+            <option value="14">14</option>
+            <option value="15">15 (Master)</option>
+          </select>
+        </div>
+        <span class="text-xs text-gray-500 mt-2 md:mt-0">You can change the starting level before clicking New Game.</span>
+      </div>
+
       <div class="text-center mb-8">
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">
           Complete the Pattern
@@ -126,6 +153,10 @@
       });
 
       document.getElementById("new-game").addEventListener("click", () => {
+        const levelSelect = document.getElementById("level-select");
+        if (levelSelect) {
+          this.level = parseInt(levelSelect.value, 10) || 1;
+        }
         this.reset();
       });
     }
@@ -476,7 +507,11 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    new PatternRecognition();
+    const levelSelect = document.getElementById("level-select");
+    if (levelSelect) levelSelect.value = "1";
+    const game = new PatternRecognition();
+    game.level = 1;
+    // Optionally: update the UI if needed
   });
 </script>
 

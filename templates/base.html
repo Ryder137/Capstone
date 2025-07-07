@@ -6,6 +6,8 @@
     <title>
       {% block title %}UniCare - Mental Health Support{% endblock %}
     </title>
+    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link
       rel="stylesheet"
@@ -29,32 +31,38 @@
             <div class="hidden md:flex items-center space-x-1">
               <a
                 href="{{ url_for('index') }}"
-                class="py-4 px-2 text-blue-500 border-b-4 border-blue-500 font-semibold"
+                style="{% if active_page == 'index' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Home</a
               >
               <a
                 href="{{ url_for('assessment') }}"
-                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                style="{% if active_page == 'assessment' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Assessment</a
               >
               <a
                 href="{{ url_for('journal') }}"
-                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                style="{% if active_page == 'journal' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Journal</a
               >
               <a
                 href="{{ url_for('chatbot') }}"
-                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                style="{% if active_page == 'chatbot' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Chat Support</a
               >
               <a
                 href="{{ url_for('games') }}"
-                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                style="{% if active_page == 'games' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Mental Games</a
               >
               <a
                 href="{{ url_for('breathing') }}"
-                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300"
+                style="{% if active_page == 'breathing' %}color: #3b82f6 !important; border-bottom: 4px solid #3b82f6 !important; font-weight: 600 !important;{% endif %}"
+                class="py-4 px-2 hover:text-blue-600 transition-colors duration-300"
                 >Breathing</a
               >
             </div>

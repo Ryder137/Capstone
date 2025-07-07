@@ -3,10 +3,17 @@ import json
 import datetime
 import random
 import os
+from dotenv import load_dotenv
 from supabase import create_client, Client
 from config import SUPABASE_URL, SUPABASE_KEY
 import google.generativeai as genai
 from database import Database
+
+db = Database()
+
+# Load environment variables from .env
+load_dotenv()
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -120,7 +127,7 @@ mental_games = [
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', active_page='index')
 
 @app.route('/login')
 def login():
@@ -139,20 +146,38 @@ def login_post():
         flash('Please fill in all fields.', 'error')
         return redirect(url_for('login'))
     
-    # Verify user credentials using database
-    user = db.verify_password(email, password)
-    
-    if user:
+    try:
+        # Authenticate with Supabase
+        response = supabase.auth.sign_in_with_password({
+            'email': email,
+            'password': password
+        })
+        
+        if response.get('error'):
+            flash(response['error']['message'], 'error')
+            return redirect(url_for('login'))
+        
+        # Get user data
+        user = response['user']
+        
+        # Check admin status using the users table
+        user_data = supabase.table('users').select('is_admin').eq('id', user['id']).single().execute()
+        is_admin = user_data['data'] and user_data['data'].get('is_admin', False)
+        
+        # Store user data in session
         session['user'] = {
             'id': user['id'],
             'email': user['email'],
-            'name': user['name']
+            'is_admin': is_admin
         }
-        db.update_last_login(user['id'])
-        flash(f'Welcome back, {user["name"]}!', 'success')
+        
+        flash('Welcome back!', 'success')
+        if is_admin:
+            return redirect(url_for('dashboard'))
         return redirect(url_for('index'))
-    else:
-        flash('Invalid email or password.', 'error')
+        
+    except Exception as e:
+        flash('Authentication failed. Please try again.', 'error')
         return redirect(url_for('login'))
 
 @app.route('/test-supabase')
@@ -221,7 +246,7 @@ def doctors():
 
 @app.route('/assessment')
 def assessment():
-    return render_template('assessment.html', questions=assessment_questions)
+    return render_template('assessment.html', questions=assessment_questions, active_page='assessment')
 
 @app.route('/submit_assessment', methods=['POST'])
 def submit_assessment():
@@ -266,7 +291,7 @@ def submit_assessment():
 
 @app.route('/journal')
 def journal():
-    return render_template('journal.html')
+    return render_template('journal.html', active_page='journal')
 
 @app.route('/save_journal', methods=['POST'])
 def save_journal():
@@ -324,26 +349,47 @@ def journal_stats():
 
 @app.route('/chatbot')
 def chatbot():
-    return render_template('chatbot.html')
+    return render_template('chatbot.html', active_page='chatbot')
 
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get('message', '')
 
+    # Build context from chat and journal history
+    context = ""
+    user_id = None
+    if 'user' in session:
+        user_id = session['user']['id']
+        # Get last 5 chat messages
+        chat_history = db.get_user_chat_history(user_id, limit=5)
+        for chat in reversed(chat_history):  # Oldest first for context
+            context += f"User: {chat.get('message','')}\nAI: {chat.get('response','')}\n"
+        # Get last 2 journal entries
+        journal_entries = db.get_user_journal_entries(user_id, limit=2)
+        # Add most recent mood/anxiety/stress summary if available
+        if journal_entries:
+            latest = journal_entries[0]
+            context += f"Recent mood: {latest.get('mood','-')}, Anxiety: {latest.get('anxiety_level','-')}, Stress: {latest.get('stress_level','-')}\n"
+        for entry in reversed(journal_entries):
+            context += f"[Journal Entry] {entry.get('title','')}: {entry.get('content','')}\n"
+
+    # Build the prompt for Gemini
+    prompt = f"{context}User: {user_message}\nAI:"
+
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
-
-        response = model.generate_content(user_message)
-
+        response = model.generate_content(prompt)
         bot_reply = response.text if hasattr(response, 'text') else "Sorry, I couldn't understand that."
-
     except Exception as e:
         bot_reply = f"An error occurred: {str(e)}"
 
-    if 'user' in session:
-        db.save_chat_message(session['user']['id'], user_message, bot_reply)
+    if user_id:
+        db.save_chat_message(user_id, user_message, bot_reply)
 
-    return jsonify({'response': bot_reply})
+    # Replace newlines with <br> for HTML display
+    bot_reply_html = bot_reply.replace('\n', '<br>')
+    return jsonify({'response': bot_reply_html})
+
 
 @app.route('/chat_history')
 def chat_history():
@@ -355,18 +401,19 @@ def chat_history():
 
 @app.route('/games')
 def games():
-    return render_template('games.html', games=mental_games)
+    return render_template('games.html', active_page='games', games=mental_games)
 
 @app.route('/game/<int:game_id>')
 def play_game(game_id):
     game = next((g for g in mental_games if g['id'] == game_id), None)
     if not game:
         return redirect(url_for('games'))
+    return render_template(f'game_{game["type"]}.html', active_page='games', game=game)
     return render_template(f'game_{game["type"]}.html', game=game)
 
 @app.route('/breathing')
 def breathing():
-    return render_template('breathing.html')
+    return render_template('breathing.html', active_page='breathing')
 
 @app.route('/save_breathing_session', methods=['POST'])
 def save_breathing_session():
@@ -448,5 +495,133 @@ def book_appointment():
         selected_doctor = next((d for d in doctors_data if d['id'] == int(doctor_id)), None)
     return render_template('book_appointment.html', doctors=doctors_data, selected_doctor=selected_doctor)
 
+# --- ADMIN LOGIN ROUTES & PROTECTION ---
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Bypass admin check in development
+        if app.debug:
+            # Set dummy admin user in session if not set
+            if 'user' not in session:
+                session['user'] = {
+                    'id': 'dev_admin',
+                    'email': 'dev@example.com',
+                    'is_admin': True
+                }
+            return f(*args, **kwargs)
+            
+        # Original admin check for production
+        user = session.get('user')
+        if not user or not user.get('is_admin'):
+            flash('Admin access required.', 'error')
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    users = supabase.table('users').select('id', 'email', 'is_admin').execute().data
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/set-admin/<user_id>', methods=['POST'])
+@admin_required
+def set_admin(user_id):
+    supabase.table('users').update({'is_admin': True}).eq('id', user_id).execute()
+    flash('User promoted to admin.', 'success')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/unset-admin/<user_id>', methods=['POST'])
+@admin_required
+def unset_admin(user_id):
+    supabase.table('users').update({'is_admin': False}).eq('id', user_id).execute()
+    flash('Admin rights removed.', 'success')
+    return redirect(url_for('admin_users'))
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Bypass admin check in development
+        if app.debug:
+            # Set dummy admin user in session if not set
+            if 'user' not in session:
+                session['user'] = {
+                    'id': 'dev_admin',
+                    'email': 'dev@example.com',
+                    'is_admin': True
+                }
+            return f(*args, **kwargs)
+            
+        # Original admin check for production
+        user = session.get('user')
+        if not user or not user.get('is_admin'):
+            flash('Admin access required.', 'error')
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/admin/login', methods=['GET'])
+def admin_login():
+    return render_template('admin_login.html')
+
+@app.route('/admin/login', methods=['POST'])
+def admin_login_post():
+    # Auto-login in development mode
+    if app.debug:
+        session['user'] = {
+            'id': 'dev_admin',
+            'email': 'dev@example.com',
+            'is_admin': True
+        }
+        return redirect(url_for('admin_dashboard'))
+        
+    # Original login logic for production
+    email = request.form.get('email')
+    password = request.form.get('password')
+    if not email or not password:
+        flash('Please fill in all fields.', 'error')
+        return redirect(url_for('admin_login'))
+        
+    # No email domain check - we'll only check the is_admin flag
+    try:
+        # Authenticate with Supabase
+        response = supabase.auth.sign_in_with_password({
+            'email': email,
+            'password': password
+        })
+        print("Supabase admin login response:", response)  # Debug line
+        if response.get('error'):
+            flash(response['error']['message'], 'error')
+            return redirect(url_for('admin_login'))
+        user = response['user']
+        user_id = user['id']
+        # Check if user exists and is admin
+        user_data = supabase.table('users').select('is_admin').eq('email', email).single().execute()
+        if not user_data['data'] or not user_data['data'].get('is_admin'):
+            flash('You are not authorized as admin.', 'error')
+            return redirect(url_for('admin_login'))
+            
+        # Store user data in session
+        session['user'] = {
+            'id': user['id'],
+            'email': user['email'],
+            'is_admin': True
+        }
+        flash('Welcome, admin!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    except Exception as e:
+        flash('Authentication failed. Please try again.', 'error')
+        return redirect(url_for('admin_login'))
+
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    # You can customize this to show admin-specific stats
+    return render_template('admin_dashboard.html')
+
 if __name__ == '__main__':
+    # Enable debug mode for development
+    app.debug = True
     app.run(debug=True)

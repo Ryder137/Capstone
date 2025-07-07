@@ -20,9 +20,11 @@ endblock %} {% block content %}
       >
         <div class="p-6">
           <div
-            class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center mb-4"
+            class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mb-6 transform hover:scale-110 transition-all duration-300 shadow-md hover:shadow-lg"
           >
-            <i class="{{ game.icon }} text-white text-2xl"></i>
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+              <i class="{{ game.icon }} text-orange-600 text-3xl"></i>
+            </div>
           </div>
           <h3 class="text-xl font-semibold text-gray-800 mb-3">
             {{ game.name }}
@@ -72,12 +74,7 @@ endblock %} {% block content %}
             </div>
             <div class="text-sm text-gray-600">Matches</div>
           </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-purple-600" id="timer">
-              00:00
-            </div>
-            <div class="text-sm text-gray-600">Time</div>
-          </div>
+
         </div>
 
         <div class="text-center">
@@ -93,63 +90,62 @@ endblock %} {% block content %}
 
     <!-- Benefits Section -->
     <div
-      class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white p-8"
+      class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white p-8 mb-16 hover:shadow-lg transition-all duration-300"
     >
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-4">Benefits of Mental Games</h2>
-        <p class="text-xl opacity-90">
-          Regular brain training can significantly improve your mental health
-          and cognitive abilities
+        <p class="text-lg opacity-90 max-w-2xl mx-auto">
+          Engage your mind and enhance your mental well-being through fun and challenging games.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="text-center">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="group relative flex items-center gap-6 p-6 hover:bg-white/10 rounded-xl transition-all duration-300">
           <div
-            class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center p-3 transition-transform group-hover:scale-110"
           >
             <i class="bi bi-brain text-2xl"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">Cognitive Function</h3>
-          <p class="text-sm opacity-90">
-            Improve memory, attention, and processing speed
-          </p>
+          <div class="flex flex-col items-start">
+            <span class="text-lg font-semibold">Cognitive Function</span>
+            <p class="text-base opacity-80">Enhance memory, attention, and processing speed</p>
+          </div>
         </div>
 
-        <div class="text-center">
+        <div class="group relative flex items-center gap-6 p-6 hover:bg-white/10 rounded-xl transition-all duration-300">
           <div
-            class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center p-3 transition-transform group-hover:scale-110"
           >
             <i class="bi bi-heart text-2xl"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">Stress Relief</h3>
-          <p class="text-sm opacity-90">
-            Reduce stress and anxiety through focused activities
-          </p>
+          <div class="flex flex-col items-start">
+            <span class="text-lg font-semibold">Stress Relief</span>
+            <p class="text-base opacity-80">Reduce stress and anxiety through focused activities</p>
+          </div>
         </div>
 
-        <div class="text-center">
+        <div class="group relative flex items-center gap-6 p-6 hover:bg-white/10 rounded-xl transition-all duration-300">
           <div
-            class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center p-3 transition-transform group-hover:scale-110"
           >
             <i class="bi bi-lightning text-2xl"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">Mental Agility</h3>
-          <p class="text-sm opacity-90">
-            Enhance problem-solving and decision-making skills
-          </p>
+          <div class="flex flex-col items-start">
+            <span class="text-lg font-semibold">Mental Agility</span>
+            <p class="text-base opacity-80">Enhance problem-solving and decision-making skills</p>
+          </div>
         </div>
 
-        <div class="text-center">
+        <div class="group relative flex items-center gap-6 p-6 hover:bg-white/10 rounded-xl transition-all duration-300">
           <div
-            class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center p-3 transition-transform group-hover:scale-110"
           >
             <i class="bi bi-emoji-smile text-2xl"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">Mood Boost</h3>
-          <p class="text-sm opacity-90">
-            Release endorphins and improve overall mood
-          </p>
+          <div class="flex flex-col items-start">
+            <span class="text-lg font-semibold">Mood Boost</span>
+            <p class="text-base opacity-80">Release endorphins and improve overall mood</p>
+          </div>
         </div>
       </div>
     </div>
@@ -163,8 +159,7 @@ endblock %} {% block content %}
       this.flippedCards = [];
       this.matchedPairs = 0;
       this.moves = 0;
-      this.startTime = null;
-      this.timerInterval = null;
+
       this.gameContainer = document.getElementById("memory-game");
 
       this.symbols = ["🌟", "🎈", "🌺", "🎵", "⭐", "🎯", "🌙", "🎨"];
@@ -280,24 +275,7 @@ endblock %} {% block content %}
       this.renderCards();
     }
 
-    startTimer() {
-      this.startTime = Date.now();
-      this.timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-        const minutes = Math.floor(elapsed / 60)
-          .toString()
-          .padStart(2, "0");
-        const seconds = (elapsed % 60).toString().padStart(2, "0");
-        document.getElementById("timer").textContent = `${minutes}:${seconds}`;
-      }, 1000);
-    }
-
     gameComplete() {
-      clearInterval(this.timerInterval);
-      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-
       setTimeout(() => {
         alert(
           `🎉 Congratulations! You completed the game in ${
@@ -325,6 +303,8 @@ endblock %} {% block content %}
   }
 
   // Initialize game when page loads
+
+
   document.addEventListener("DOMContentLoaded", function () {
     new MemoryGame();
   });

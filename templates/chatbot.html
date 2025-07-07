@@ -22,10 +22,10 @@ endblock %} {% block content %}
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
       <!-- Chat Interface -->
-      <div class="lg:col-span-3">
-        <div class="bg-white rounded-xl shadow-lg h-[600px] flex flex-col">
+      <div>
+        <div class="bg-white rounded-xl shadow-lg h-[600px] flex flex-col mb-8">
           <!-- Chat Header -->
           <div class="p-6 border-b border-gray-200 flex items-center">
             <div
@@ -47,28 +47,46 @@ endblock %} {% block content %}
             </div>
           </div>
 
-          <!-- Chat Messages -->
-          <div class="flex-1 p-6 overflow-y-auto" id="chat-messages">
-            <div class="space-y-4">
-              <div class="flex items-start">
-                <div
-                  class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-1"
-                >
-                  <i class="bi bi-robot text-white text-sm"></i>
-                </div>
-                <div class="flex-1">
-                  <div class="bg-gray-100 rounded-lg p-4 max-w-md">
-                    <p class="text-gray-800">
-                      Hello! I'm here to support you. I'm an AI assistant
-                      trained in psychology principles and I'm here to listen
-                      and help. How are you feeling today?
-                    </p>
-                  </div>
-                  <span class="text-xs text-gray-500 mt-1 block">Just now</span>
-                </div>
-              </div>
-            </div>
+          <!-- Current Mood Banner -->
+          <div id="current-mood-banner" class="flex items-center gap-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg px-5 py-3 my-2 max-w-lg mx-auto shadow-sm" style="display:none;">
+            <span id="current-mood-emoji" class="text-2xl"></span>
+            <span class="font-medium text-gray-800">Current Mood:</span>
+            <span id="current-mood-text" class="capitalize font-semibold"></span>
+            <span class="text-gray-500">| Anxiety:</span>
+            <span id="current-anxiety" class="font-semibold text-blue-600"></span>
+            <span class="text-gray-500">| Stress:</span>
+            <span id="current-stress" class="font-semibold text-orange-600"></span>
           </div>
+
+          <!-- Chat Messages -->
+          <div class="flex-1 p-6 overflow-y-auto" id="chat-messages" style="max-height: 70vh; min-height: 300px;">
+    <div class="space-y-4">
+      <div class="flex items-start">
+        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-1">
+          <i class="bi bi-robot text-white text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <div class="bg-gray-100 rounded-lg p-4 max-w-md">
+            <p class="text-gray-800">
+              Hello! I'm here to support you. I'm an AI assistant
+              trained in psychology principles and I'm here to listen
+              and help. How are you feeling today?
+            </p>
+          </div>
+          <span class="text-xs text-gray-500 mt-1 block">Just now</span>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+  // Ensure chat-messages is scrolled to top on load
+  document.addEventListener("DOMContentLoaded", function () {
+    const chatMessages = document.getElementById("chat-messages");
+    if (chatMessages) {
+      chatMessages.scrollTop = 0;
+    }
+  });
+</script>
 
           <!-- Chat Input -->
           <div class="p-6 border-t border-gray-200">
@@ -117,146 +135,136 @@ endblock %} {% block content %}
         </div>
       </div>
 
-      <!-- Sidebar -->
-      <div class="lg:col-span-1">
-        <div class="space-y-6">
-          <!-- Crisis Resources -->
-          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-red-800 mb-4">
-              <i class="bi bi-exclamation-triangle text-red-600 mr-2"></i>
-              Crisis Support
-            </h3>
-            <div class="space-y-3 text-sm">
-              <div>
-                <p class="font-semibold text-red-800">
-                  Suicide & Crisis Lifeline
-                </p>
-                <a href="tel:988" class="text-red-600 hover:text-red-800"
-                  >📞 988</a
-                >
-              </div>
-              <div>
-                <p class="font-semibold text-red-800">Crisis Text Line</p>
-                <p class="text-red-600">Text HOME to 741741</p>
-              </div>
-              <div>
-                <p class="font-semibold text-red-800">Emergency Services</p>
-                <a href="tel:911" class="text-red-600 hover:text-red-800"
-                  >📞 911</a
-                >
-              </div>
-            </div>
+      <!-- Top Row: Crisis Support, Guidelines, Topics, Quick Actions -->
+      <div class="flex flex-col lg:flex-row gap-4 mb-10">
+        <!-- Chat Guidelines -->
+        <div class="flex-1 min-w-[220px] bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-chat-dots text-purple-600 mr-2"></i>Chat Guidelines</h3>
+          <ul class="space-y-2 text-sm text-gray-600 w-full">
+            <li class="flex items-start"><i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i><span>Be honest about your feelings</span></li>
+            <li class="flex items-start"><i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i><span>Take your time to express yourself</span></li>
+            <li class="flex items-start"><i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i><span>Ask for specific coping strategies</span></li>
+            <li class="flex items-start"><i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i><span>Remember this is a safe space</span></li>
+          </ul>
+        </div>
+        <!-- Helpful Topics -->
+        <div class="flex-1 min-w-[220px] bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-lightbulb text-yellow-600 mr-2"></i>What I Can Help With</h3>
+          <div class="space-y-2 text-sm w-full">
+            <div class="p-2 bg-blue-50 rounded cursor-pointer hover:bg-blue-100 transition duration-300 topic-btn" data-topic="anxiety"><i class="bi bi-heart-pulse text-blue-600 mr-2"></i><span class="text-blue-800">Anxiety Management</span></div>
+            <div class="p-2 bg-green-50 rounded cursor-pointer hover:bg-green-100 transition duration-300 topic-btn" data-topic="stress"><i class="bi bi-speedometer text-green-600 mr-2"></i><span class="text-green-800">Stress Relief</span></div>
+            <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100 transition duration-300 topic-btn" data-topic="depression"><i class="bi bi-cloud-rain text-purple-600 mr-2"></i><span class="text-purple-800">Depression Support</span></div>
+            <div class="p-2 bg-orange-50 rounded cursor-pointer hover:bg-orange-100 transition duration-300 topic-btn" data-topic="sleep"><i class="bi bi-moon text-orange-600 mr-2"></i><span class="text-orange-800">Sleep Issues</span></div>
+            <div class="p-2 bg-pink-50 rounded cursor-pointer hover:bg-pink-100 transition duration-300 topic-btn" data-topic="relationships"><i class="bi bi-people text-pink-600 mr-2"></i><span class="text-pink-800">Relationships</span></div>
           </div>
-
-          <!-- Chat Guidelines -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              <i class="bi bi-chat-dots text-purple-600 mr-2"></i>
-              Chat Guidelines
-            </h3>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li class="flex items-start">
-                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
-                <span>Be honest about your feelings</span>
-              </li>
-              <li class="flex items-start">
-                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
-                <span>Take your time to express yourself</span>
-              </li>
-              <li class="flex items-start">
-                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
-                <span>Ask for specific coping strategies</span>
-              </li>
-              <li class="flex items-start">
-                <i class="bi bi-check-circle text-green-500 mr-2 mt-1"></i>
-                <span>Remember this is a safe space</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Helpful Topics -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              <i class="bi bi-lightbulb text-yellow-600 mr-2"></i>
-              What I Can Help With
-            </h3>
-            <div class="space-y-2 text-sm">
-              <div
-                class="p-2 bg-blue-50 rounded cursor-pointer hover:bg-blue-100 transition duration-300 topic-btn"
-                data-topic="anxiety"
-              >
-                <i class="bi bi-heart-pulse text-blue-600 mr-2"></i>
-                <span class="text-blue-800">Anxiety Management</span>
-              </div>
-              <div
-                class="p-2 bg-green-50 rounded cursor-pointer hover:bg-green-100 transition duration-300 topic-btn"
-                data-topic="stress"
-              >
-                <i class="bi bi-speedometer text-green-600 mr-2"></i>
-                <span class="text-green-800">Stress Relief</span>
-              </div>
-              <div
-                class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100 transition duration-300 topic-btn"
-                data-topic="depression"
-              >
-                <i class="bi bi-cloud-rain text-purple-600 mr-2"></i>
-                <span class="text-purple-800">Depression Support</span>
-              </div>
-              <div
-                class="p-2 bg-orange-50 rounded cursor-pointer hover:bg-orange-100 transition duration-300 topic-btn"
-                data-topic="sleep"
-              >
-                <i class="bi bi-moon text-orange-600 mr-2"></i>
-                <span class="text-orange-800">Sleep Issues</span>
-              </div>
-              <div
-                class="p-2 bg-pink-50 rounded cursor-pointer hover:bg-pink-100 transition duration-300 topic-btn"
-                data-topic="relationships"
-              >
-                <i class="bi bi-people text-pink-600 mr-2"></i>
-                <span class="text-pink-800">Relationships</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              <i class="bi bi-lightning text-blue-600 mr-2"></i>
-              Quick Actions
-            </h3>
-            <div class="space-y-3">
-              <a
-                href="{{ url_for('breathing') }}"
-                class="block w-full text-center bg-blue-100 text-blue-800 py-2 px-4 rounded-lg hover:bg-blue-200 transition duration-300"
-              >
-                <i class="bi bi-wind mr-2"></i>Breathing Exercise
-              </a>
-              <a
-                href="{{ url_for('journal') }}"
-                class="block w-full text-center bg-green-100 text-green-800 py-2 px-4 rounded-lg hover:bg-green-200 transition duration-300"
-              >
-                <i class="bi bi-journal-text mr-2"></i>Write in Journal
-              </a>
-              <a
-                href="{{ url_for('games') }}"
-                class="block w-full text-center bg-purple-100 text-purple-800 py-2 px-4 rounded-lg hover:bg-purple-200 transition duration-300"
-              >
-                <i class="bi bi-puzzle mr-2"></i>Play Mental Games
-              </a>
-            </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="flex-1 min-w-[220px] bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-lightning text-blue-600 mr-2"></i>Quick Actions</h3>
+          <div class="space-y-3 w-full">
+            <a href="{{ url_for('breathing') }}" class="block w-full text-center bg-blue-100 text-blue-800 py-2 px-4 rounded-lg hover:bg-blue-200 transition duration-300"><i class="bi bi-wind mr-2"></i>Breathing Exercise</a>
+            <a href="{{ url_for('journal') }}" class="block w-full text-center bg-green-100 text-green-800 py-2 px-4 rounded-lg hover:bg-green-200 transition duration-300"><i class="bi bi-journal-text mr-2"></i>Write in Journal</a>
+            <a href="{{ url_for('games') }}" class="block w-full text-center bg-purple-100 text-purple-800 py-2 px-4 rounded-lg hover:bg-purple-200 transition duration-300"><i class="bi bi-puzzle mr-2"></i>Play Mental Games</a>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+<!-- Crisis Support (Philippines) - Before Footer -->
+<div class="mt-10">
+  <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center"><i class="bi bi-exclamation-triangle text-red-600 mr-2"></i>Crisis Support</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm w-full">
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">National Center for Mental Health (NCMH)</p>
+        <span class="block text-red-600">Landline: <a href="tel:1553" class="underline">1553</a> (Nationwide, Toll-Free)</span>
+        <span class="block text-red-600">Globe/TM: <a href="tel:09663514518" class="underline">0966-351-4518</a>, <a href="tel:09178998727" class="underline">0917-899-8727</a></span>
+        <span class="block text-red-600">Smart/Sun/TNT: <a href="tel:09086392672" class="underline">0908-639-2672</a></span>
+        <span class="block text-gray-600">24/7. Free, confidential, Luzon-wide landlines are toll-free.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">In Touch Community Services</p>
+        <span class="block text-red-600">Landline: <a href="tel:0288937603" class="underline">(02) 8893-7603</a></span>
+        <span class="block text-red-600">Globe: <a href="tel:09178001123" class="underline">0917-800-1123</a></span>
+        <span class="block text-red-600">Sun: <a href="tel:09228938944" class="underline">0922-893-8944</a></span>
+        <span class="block text-gray-600">24/7, free, compassionate and confidential support.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">NGF HOPELINE PH</p>
+        <span class="block text-red-600">Globe/TM: <a href="tel:2919" class="underline">2919</a> (toll-free)</span>
+        <span class="block text-red-600">Globe: <a href="tel:09175584673" class="underline">0917-558-HOPE (4673)</a></span>
+        <span class="block text-red-600">Smart: <a href="tel:09188734673" class="underline">0918-873-HOPE (4673)</a></span>
+        <span class="block text-red-600">Landline: <a href="tel:0288044673" class="underline">(02) 8804-HOPE (4673)</a></span>
+        <span class="block text-gray-600">24/7 Suicide Prevention and Emotional Crisis Line.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">Tawag Paglaum – Centro Bisaya</p>
+        <span class="block text-red-600">Smart/Sun: <a href="tel:09399375433" class="underline">0939-9375433</a>, <a href="tel:09399365433" class="underline">0939-9365433</a></span>
+        <span class="block text-red-600">Globe/TM: <a href="tel:09276541629" class="underline">0927-6541629</a></span>
+        <span class="block text-gray-600">24/7 for emotional and suicidal crisis.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">Philippine Mental Health Association (PMHA)</p>
+        <span class="block text-red-600">Landline: <a href="tel:0289214958" class="underline">(02) 8921-4958</a>, <a href="tel:0289214959" class="underline">(02) 8921-4959</a> <span class="text-gray-600">(7am-4pm, Mon-Fri)</span></span>
+        <span class="block text-red-600">Text: <a href="sms:09175652036" class="underline">0917-565-2036</a></span>
+        <span class="block text-red-600">Email: <a href="mailto:pmhacds@gmail.com" class="underline">pmhacds@gmail.com</a></span>
+        <span class="block text-gray-600">Chat: 8am-5pm, Mon-Sat.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">Manila Lifeline Centre (MLC)</p>
+        <span class="block text-red-600">Landline: <a href="tel:028969191" class="underline">(02) 896-9191</a></span>
+        <span class="block text-red-600">Globe: <a href="tel:09178549191" class="underline">0917-854-9191</a></span>
+        <span class="block text-gray-600">Focuses on suicide prevention, awareness, and support.</span>
+      </div>
+      <div class="bg-white rounded shadow p-4">
+        <p class="font-semibold text-red-800">General Emergency Hotline</p>
+        <span class="block text-red-600">Police, Fire, Medical: <a href="tel:911" class="underline">911</a></span>
+        <span class="block text-gray-600">For immediate and severe emergencies.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %} {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const chatForm = document.getElementById("chat-form");
     const chatInput = document.getElementById("chat-input");
     const chatMessages = document.getElementById("chat-messages");
+
+    // Fetch and display current mood (can be called on load or after journal save)
+    function updateCurrentMoodBanner() {
+      fetch("/get_journal_entries")
+        .then((response) => response.json())
+        .then((entries) => {
+          if (entries.length > 0) {
+            const latest = entries[0];
+            const mood = latest.mood || "-";
+            const anxiety = latest.anxiety || latest.anxiety_level || "-";
+            const stress = latest.stress || latest.stress_level || "-";
+            const moodEmojiMap = {
+              happy: "😊",
+              sad: "😢",
+              anxious: "😰",
+              calm: "😌",
+              angry: "😠",
+              neutral: "😐",
+              "very-sad": "😭",
+              excited: "😃",
+              tired: "😴",
+            };
+            const moodEmoji = moodEmojiMap[mood] || "😐";
+            document.getElementById("current-mood-emoji").textContent = moodEmoji;
+            document.getElementById("current-mood-text").textContent = mood;
+            document.getElementById("current-anxiety").textContent = anxiety;
+            document.getElementById("current-stress").textContent = stress;
+            document.getElementById("current-mood-banner").style.display = "flex";
+          }
+        });
+    }
+    // Call on load
+    updateCurrentMoodBanner();
 
     // Handle form submission
     chatForm.addEventListener("submit", function (e) {
@@ -398,5 +406,12 @@ endblock %} {% block content %}
       typingIndicator.remove();
     }
   }
+// Listen for a custom event after journal save to refresh mood
+window.addEventListener('journalSaved', function() {
+  if (typeof updateCurrentMoodBanner === 'function') {
+    updateCurrentMoodBanner();
+  }
+});
+
 </script>
 {% endblock %}

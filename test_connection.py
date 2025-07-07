@@ -48,4 +48,24 @@ except Exception as e:
     print(f"❌ Failed to initialize Supabase client: {str(e)}")
     exit(1)
 
+# --- Supabase Auth login test ---
+import os
+
+test_email = os.getenv('TEST_ADMIN_EMAIL', 'admin@email.com')
+test_password = os.getenv('TEST_ADMIN_PASSWORD', 'password123')
+
+print(f"\nTesting Supabase Auth login for {test_email}...")
+try:
+    auth_response = supabase.auth.sign_in_with_password({
+        'email': test_email,
+        'password': test_password
+    })
+    print("Auth response:", auth_response)
+    if auth_response.get('error'):
+        print(f"❌ Auth failed: {auth_response['error']['message']}")
+    else:
+        print("✅ Auth succeeded! User:", auth_response.get('user'))
+except Exception as e:
+    print(f"❌ Exception during auth: {str(e)}")
+
 print("\nAll tests passed! You can now deploy to Vercel.")

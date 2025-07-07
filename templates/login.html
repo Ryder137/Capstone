@@ -7,7 +7,8 @@ block content %}
     <div class="bg-white rounded-xl shadow-lg p-8">
       <div class="text-center mb-8">
         <div
-          class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+          class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          id="login-icon"
         >
           <i class="bi bi-person text-white text-2xl"></i>
         </div>
@@ -110,28 +111,15 @@ block content %}
           <a
             href="{{ url_for('signup') }}"
             class="text-blue-600 hover:text-blue-800 font-semibold transition duration-300"
-            >Sign up here</a
-          >
+            >Sign up here</a>
         </p>
-      </div>
-
-      <div class="mt-8 pt-6 border-t border-gray-200">
-        <div class="text-center">
-          <p class="text-sm text-gray-500 mb-4">Or continue with</p>
-          <div class="flex space-x-4">
-            <button
-              class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
-            >
-              <i class="bi bi-google mr-2"></i>Google
-            </button>
-            <button
-              class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
-            >
-              <i class="bi bi-facebook mr-2"></i>Facebook
-            </button>
-          </div>
+        <div class="mt-4">
+          <a href="{{ url_for('admin_login') }}" class="text-sm text-green-700 hover:text-green-900 font-semibold transition duration-300">
+            <i class="bi bi-shield-lock mr-1"></i>Admin Login
+          </a>
         </div>
       </div>
+
     </div>
 
     <div class="mt-8 text-center">
@@ -144,6 +132,18 @@ block content %}
         <a href="#" class="text-blue-600 hover:text-blue-800">Privacy Policy</a>
       </p>
     </div>
+
+    {% if session.get('user') and session.get('user').get('is_admin') %}
+    <div class="mt-6 text-center">
+      <p class="text-green-600 font-semibold mb-2">
+        <i class="bi bi-shield-check mr-2"></i>Admin Access Enabled
+      </p>
+      <a href="{{ url_for('admin_dashboard') }}" 
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300">
+        <i class="bi bi-grid-3x3-gap-fill mr-2"></i>Go to Admin Dashboard
+      </a>
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %} {% block scripts %}

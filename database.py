@@ -18,19 +18,35 @@ class Database:
 
     # User management methods
     def create_user(self, name, email, password):
-        """Create a new user"""
-        password_hash = generate_password_hash(password)
+        """Create a new user using Supabase Auth and sync profile info to users table"""
         try:
-            result = self.client.table('users').insert({
-                'name': name,
+            # Register user with Supabase Auth
+            result = self.client.auth.sign_up({
                 'email': email,
-                'password_hash': password_hash,
-                'created_at': datetime.utcnow().isoformat(),
-                'is_active': True
-            }).execute()
-            return result.data[0]['id']
+                'password': password
+            })
+            print("Supabase sign_up result:", result)
+            if result.user:
+                user_id = result.user.id
+                # Insert profile info into users table (no password)
+                insert_result = self.client.table('users').insert({
+                    'id': user_id,
+                    'user_id': user_id,
+                    'email': email
+                }).execute()
+                print("Insert result:", insert_result)
+                if getattr(insert_result, 'error', None):
+                    print("Insert error:", insert_result.error)
+                    return None
+                return user_id
+            elif result.error:
+                print("Error: Supabase Auth registration failed:", result.error)
+                return None
+            else:
+                print("Unknown error during Supabase Auth registration.")
+                return None
         except Exception as e:
-            print(f"Error creating user: {str(e)}")
+            print(f"Error creating user with Supabase Auth: {str(e)}")
             return None
 
     def get_user_by_email(self, email):
@@ -128,19 +144,18 @@ class Database:
     
     def get_user_journal_entries(self, user_id, limit=50):
         """Get user's journal entries"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            SELECT * FROM journal_entries 
-            WHERE user_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT ?
-        ''', (user_id, limit))
-        entries = cursor.fetchall()
-        conn.close()
-        
-        return [dict(entry) for entry in entries]
+        try:
+            result = self.client.table('journal_entries') \
+                .select('*') \
+                .eq('user_id', user_id) \
+                .order('created_at', desc=True) \
+                .limit(limit) \
+                .execute()
+            return result.data
+        except Exception as e:
+            print(f"Error getting journal entries: {str(e)}")
+            return []
+
     
     def get_journal_stats(self, user_id, days=30):
         """Get journal statistics for the user"""
@@ -280,30 +295,28 @@ class Database:
     # Chat history methods
     def save_chat_message(self, user_id, message, response):
         """Save chat message and response"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            INSERT INTO chat_messages (user_id, message, response)
-            VALUES (?, ?, ?)
-        ''', (user_id, message, response))
-        conn.commit()
-        conn.close()
-        
-        return cursor.lastrowid
+        try:
+            result = self.client.table('chat_messages').insert({
+                'user_id': user_id,
+                'message': message,
+                'response': response,
+                'created_at': datetime.utcnow().isoformat()
+            }).execute()
+            return result.data[0]['id'] if result.data else None
+        except Exception as e:
+            print(f"Error saving chat message: {str(e)}")
+            return None
     
     def get_user_chat_history(self, user_id, limit=50):
         """Get user's chat history"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            SELECT * FROM chat_messages 
-            WHERE user_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT ?
-        ''', (user_id, limit))
-        messages = cursor.fetchall()
-        conn.close()
-        
-        return [dict(message) for message in messages]
+        try:
+            result = self.client.table('chat_messages') \
+                .select('*') \
+                .eq('user_id', user_id) \
+                .order('created_at', desc=True) \
+                .limit(limit) \
+                .execute()
+            return result.data
+        except Exception as e:
+            print(f"Error getting chat history: {str(e)}")
+            return []
