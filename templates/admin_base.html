@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    <!-- Admin Header -->
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-900">UniCare Admin</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">Welcome, {{ session.user_email }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                        <i class="bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="bg-indigo-700 text-white w-64 flex-shrink-0">
+            <nav class="mt-6">
+                <div class="px-6 space-y-1">
+                    <a href="{{ url_for('admin_dashboard') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_dashboard' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-speedometer2 mr-3 {% if request.endpoint == 'admin_dashboard' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Dashboard
+                    </a>
+                    <a href="{{ url_for('admin_users') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_users' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-people mr-3 {% if request.endpoint == 'admin_users' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Users
+                    </a>
+                    <a href="{{ url_for('admin_wellbeing') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_wellbeing' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-heart-pulse mr-3 {% if request.endpoint == 'admin_wellbeing' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Well-being
+                    </a>
+                    <a href="{{ url_for('admin_assessments') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_assessments' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-clipboard-data mr-3 {% if request.endpoint == 'admin_assessments' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Assessments
+                    </a>
+                    <a href="{{ url_for('admin_content') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_content' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-file-earmark-text mr-3 {% if request.endpoint == 'admin_content' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Content
+                    </a>
+                    <a href="{{ url_for('admin_admins') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_admins' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-shield-lock mr-3 {% if request.endpoint == 'admin_admins' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Admins
+                    </a>
+                    <a href="{{ url_for('admin_track') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_track' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
+                        <i class="bi-graph-up mr-3 {% if request.endpoint == 'admin_track' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
+                        Analytics
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Page Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                        {% for category, message in messages %}
+                            <div class="rounded-md p-4 mb-4 {% if category == 'error' %}bg-red-50 border-l-4 border-red-400{% else %}bg-green-50 border-l-4 border-green-400{% endif %}">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        {% if category == 'error' %}
+                                            <i class="bi-exclamation-circle text-red-400"></i>
+                                        {% else %}
+                                            <i class="bi-check-circle text-green-400"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm {% if category == 'error' %}text-red-700{% else %}text-green-700{% endif %}">
+                                            {{ message }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close flash messages
+        function closeFlashMessage(button) {
+            button.closest('.rounded-md').style.display = 'none';
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

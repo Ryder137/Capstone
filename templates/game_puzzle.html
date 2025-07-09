@@ -15,30 +15,34 @@
 
     <div class="bg-white rounded-xl shadow-lg p-8">
       <!-- Level Selection Dropdown -->
-      <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div class="flex items-center gap-2">
-          <label for="level-select" class="text-sm font-semibold text-gray-700 flex items-center gap-1">
-            <i class="bi bi-bar-chart-steps text-blue-500 text-lg"></i>Start at Level:
+      <div class="mb-6 flex justify-center">
+        <form id="level-form" method="get" action="{{ url_for('play_game', game_id=game.id) }}" class="flex items-center gap-2">
+          <label for="level" class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+            <i class="bi bi-bar-chart-steps text-blue-500 text-lg"></i>Select Level:
           </label>
-          <select id="level-select" class="border-2 border-blue-300 shadow-sm rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-500 transition duration-200 bg-white font-semibold">
-            <option value="1">1 (Easy)</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5 (Moderate)</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10 (Hard)</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13 (Expert)</option>
-            <option value="14">14</option>
-            <option value="15">15 (Master)</option>
+          <select 
+            name="level" 
+            id="level-select" 
+            onchange="this.form.submit()"
+            class="border-2 border-blue-300 shadow-sm rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-500 transition duration-200 bg-white font-semibold"
+          >
+            <option value="1" {% if request.args.get('level', '1') == '1' %}selected{% endif %}>1 (Easy)</option>
+            <option value="2" {% if request.args.get('level') == '2' %}selected{% endif %}>2</option>
+            <option value="3" {% if request.args.get('level') == '3' %}selected{% endif %}>3</option>
+            <option value="4" {% if request.args.get('level') == '4' %}selected{% endif %}>4</option>
+            <option value="5" {% if request.args.get('level') == '5' %}selected{% endif %}>5 (Moderate)</option>
+            <option value="6" {% if request.args.get('level') == '6' %}selected{% endif %}>6</option>
+            <option value="7" {% if request.args.get('level') == '7' %}selected{% endif %}>7</option>
+            <option value="8" {% if request.args.get('level') == '8' %}selected{% endif %}>8</option>
+            <option value="9" {% if request.args.get('level') == '9' %}selected{% endif %}>9</option>
+            <option value="10" {% if request.args.get('level') == '10' %}selected{% endif %}>10 (Hard)</option>
+            <option value="11" {% if request.args.get('level') == '11' %}selected{% endif %}>11</option>
+            <option value="12" {% if request.args.get('level') == '12' %}selected{% endif %}>12</option>
+            <option value="13" {% if request.args.get('level') == '13' %}selected{% endif %}>13 (Expert)</option>
+            <option value="14" {% if request.args.get('level') == '14' %}selected{% endif %}>14</option>
+            <option value="15" {% if request.args.get('level') == '15' %}selected{% endif %}>15 (Master)</option>
           </select>
-        </div>
-        <span class="text-xs text-gray-500 mt-2 md:mt-0">You can change the starting level before clicking New Game.</span>
+        </form>
       </div>
 
       <div class="text-center mb-8">
@@ -87,19 +91,28 @@
           </div>
         </div>
 
-        <div class="text-center">
+        <div class="flex justify-center gap-4 mt-6">
           <button
             id="next-puzzle"
-            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 mr-4"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Next Puzzle
+            <i class="bi bi-arrow-repeat mr-2"></i>Next Puzzle
           </button>
           <button
             id="new-game"
-            class="bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-600 transition duration-300"
+            class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
-            New Game
+            <i class="bi bi-plus-circle mr-2"></i>New Game
           </button>
+          <button
+            id="exit-game"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <i class="bi bi-box-arrow-left mr-2"></i>Exit Game
+          </button>
+        </div>
+        <div class="text-center mt-4 text-sm text-gray-600">
+          <p>"Next Puzzle" continues with the same level. "New Game" resets your score and level.</p>
         </div>
 
         <div id="feedback" class="mt-6 p-4 rounded-lg text-center hidden">
@@ -324,7 +337,7 @@
       });
     }
 
-    checkAnswer(selected, button) {
+    async checkAnswer(selected, button) {
       const feedback = document.getElementById("feedback");
       const allButtons = document.querySelectorAll(".answer-btn");
 
@@ -343,6 +356,13 @@
 
         this.correct++;
         this.score += this.level * 10;
+
+        // Save score when user gets a correct answer
+        try {
+          await this.saveScore();
+        } catch (error) {
+          console.error('Error saving score:', error);
+        }
 
         if (this.correct % 5 === 0) {
           this.level++;
@@ -387,14 +407,108 @@
       this.updateStats();
       this.generatePuzzle();
     }
+
+    // Function to get CSRF token from cookies
+    getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    async saveScore() {
+      if (this.score <= 0) return { success: true };  // Don't save zero scores
+      
+      try {
+        const csrfToken = this.getCookie('csrf_token');
+        if (!csrfToken) {
+          console.error('CSRF token not found in cookies');
+          return { success: false, message: 'CSRF token not found' };
+        }
+
+        const response = await fetch('/save_game_score', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            game_type: 'number_puzzle',
+            score: this.score,
+            level: this.level,
+            correct_answers: this.correct,
+            csrf_token: csrfToken  // Also include in body as fallback
+          })
+        });
+        
+        const result = await response.json();
+        if (response.ok && result.success) {
+          return { success: true, message: 'Score saved successfully' };
+        } else {
+          throw new Error(result.message || 'Failed to save score');
+        }
+      } catch (error) {
+        console.error('Error saving score:', error);
+        return { 
+          success: false, 
+          message: error.message || 'Error saving score' 
+        };
+      }
+    }
+
+    async exitGame() {
+      if (this.score > 0) {
+        try {
+          const saveResult = await this.saveScore();
+          if (!saveResult.success) {
+            console.error('Error saving score:', saveResult.message);
+          }
+        } catch (error) {
+          console.error('Error during save on exit:', error);
+        }
+      }
+      window.location.href = "{{ url_for('games') }}";
+      return true;
+    }
   }
 
   document.addEventListener("DOMContentLoaded", function () {
     const levelSelect = document.getElementById("level-select");
     if (levelSelect) levelSelect.value = "1";
     const game = new NumberPuzzle();
+    
+    // Set initial level
     game.level = 1;
-    // Optionally: update the UI if needed
+    
+    // Handle level changes
+    if (levelSelect) {
+      levelSelect.addEventListener("change", function() {
+        const newLevel = parseInt(this.value, 10);
+        if (!isNaN(newLevel)) {
+          game.level = newLevel;
+          game.reset();
+        }
+      });
+    }
+    
+    // Handle exit game button
+    const exitButton = document.getElementById('exit-game');
+    if (exitButton) {
+      exitButton.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to exit? Your score will be saved.')) {
+          await game.exitGame();
+        }
+      });
+    }
+    
+    // Handle page unload
+    window.addEventListener('beforeunload', (e) => {
+      if (game.score > 0) {
+        // Try to save the score silently without blocking
+        game.saveScore().catch(console.error);
+      }
+    });
   });
 </script>
 {% endblock %}

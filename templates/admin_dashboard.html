@@ -1,26 +1,234 @@
-{% extends "base_new.html" %}
-{% block title %}Admin Dashboard - UniCare{% endblock %}
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard - UniCare Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
-<section class="py-16 bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen flex items-center">
-  <div class="max-w-2xl mx-auto px-4 w-full">
-    <div class="bg-white rounded-xl shadow-lg p-8">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-700">
-          <i class="bi bi-shield-check text-white text-2xl"></i>
+<div class="py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6">Admin Dashboard</h2>
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-blue-50 p-6 rounded-lg">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+              <i class="bi bi-people text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Total Users</p>
+              <p class="text-2xl font-semibold text-gray-900">1,234</p>
+            </div>
+          </div>
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
-        <p class="text-gray-600">Welcome, {{ session.user.email }}!</p>
+        <!-- Add more stat cards here -->
       </div>
-      <div class="mt-6 text-center">
-        <a href="{{ url_for('logout') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300">
-          <i class="bi bi-box-arrow-right mr-2"></i>Logout
-        </a>
+
+      <!-- User Engagement -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Daily Active Users -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Daily Active Users</h3>
+          <div class="h-64">
+            <canvas id="dauChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- User Engagement by Feature -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Feature Usage</h3>
+          <div class="h-64">
+            <canvas id="featureUsageChart"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="mt-8">
-        <!-- Add admin-specific dashboard features here -->
-        <p class="text-gray-700">This is your admin area. Here you can manage users, view analytics, and more.</p>
+      
+      <!-- Emotion Tracking -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Emotion Distribution -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">User Emotions</h3>
+          <div class="h-64">
+            <canvas id="emotionChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Emotion Trends -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Emotion Trends</h3>
+          <div class="h-64">
+            <canvas id="emotionTrendsChart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Daily Active Users Chart
+    const dauCtx = document.getElementById('dauChart').getContext('2d');
+    new Chart(dauCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Active Users',
+                data: [65, 59, 80, 81, 56, 55, 40],
+                borderColor: 'rgb(59, 130, 246)',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Feature Usage Chart
+    const featureCtx = document.getElementById('featureUsageChart').getContext('2d');
+    new Chart(featureCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Journal', 'Mood Tracker', 'Breathing', 'Games', 'Chat'],
+            datasets: [{
+                label: 'Usage (minutes)',
+                data: [45, 30, 25, 35, 50],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(239, 68, 68, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Emotion Distribution Chart
+    const emotionCtx = document.getElementById('emotionChart').getContext('2d');
+    new Chart(emotionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Happy', 'Sad', 'Anxious', 'Stressed', 'Calm', 'Angry'],
+            datasets: [{
+                data: [30, 15, 20, 25, 25, 15],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(220, 38, 38, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(99, 102, 241, 1)',
+                    'rgba(220, 38, 38, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Emotion Trends Chart
+    const trendCtx = document.getElementById('emotionTrendsChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Happy',
+                    data: [20, 25, 22, 28, 32, 35],
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Anxious',
+                    data: [30, 28, 25, 22, 20, 18],
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Stressed',
+                    data: [25, 28, 26, 23, 20, 18],
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

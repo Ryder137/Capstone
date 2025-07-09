@@ -1,23 +1,22 @@
-{% extends "base_new.html" %} {% block title %}Mental Health Assessment - UniCare{%
-endblock %} {% block content %}
+{% extends "base_new.html" %}
+{% block title %}Mental Health Assessment - UniCare{% endblock %}
+
+{% block content %}
 <section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
   <div class="max-w-4xl mx-auto px-4">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-gray-800 mb-4">
-        Mental Health Assessment
+        Mental Health & Resilience Assessment
       </h1>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        This brief assessment will help you understand your current mental
-        health status. Please answer honestly for the most accurate results.
+        This assessment will help you understand your mental health and resilience levels.
+        Please answer honestly for the most accurate results.
       </p>
-      <div
-        class="mt-4 p-4 bg-yellow-100 rounded-lg border-l-4 border-yellow-500"
-      >
+      <div class="mt-4 p-4 bg-yellow-100 rounded-lg border-l-4 border-yellow-500">
         <p class="text-sm text-yellow-800">
           <i class="bi bi-info-circle mr-2"></i>
           This assessment is not a substitute for professional medical advice.
-          Please consult a healthcare provider for proper diagnosis and
-          treatment.
+          Please consult a healthcare provider for proper diagnosis and treatment.
         </p>
       </div>
     </div>
@@ -27,14 +26,12 @@ endblock %} {% block content %}
         <div class="mb-6">
           <div class="flex justify-between items-center mb-4">
             <span class="text-sm font-medium text-blue-600">Progress</span>
-            <span class="text-sm font-medium text-blue-600" id="progress-text"
-              >1 of {{ questions|length }}</span
-            >
+            <span class="text-sm font-medium text-blue-600" id="progress-text">1 of {{ questions|length }}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div
               class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style="width: {{ (1/questions|length * 100)|round }}%"
+              style="width: {{ ((1/questions|length * 100)|round)|int }}%"
               id="progress-bar"
             ></div>
           </div>
@@ -45,10 +42,22 @@ endblock %} {% block content %}
           <div
             class="question-slide {% if loop.first %}active{% else %}hidden{% endif %}"
             data-question="{{ loop.index0 }}"
+            data-category="{{ question.category }}"
           >
-            <h3 class="text-xl font-semibold text-gray-800 mb-6">
-              {{ question.question }}
-            </h3>
+            <div class="mb-4">
+              {% if question.category == 'resilience' %}
+                <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mb-2">Resilience</span>
+              {% elif question.category == 'depression' %}
+                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">Depression</span>
+              {% elif question.category == 'anxiety' %}
+                <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mb-2">Anxiety</span>
+              {% elif question.category == 'stress' %}
+                <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mb-2">Stress</span>
+              {% endif %}
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">
+                {{ question.question }}
+              </h3>
+            </div>
             <div class="space-y-3">
               {% for option in question.options %}
               <label
@@ -57,8 +66,9 @@ endblock %} {% block content %}
                 <input
                   type="radio"
                   name="question_{{ question.id }}"
-                  value="{{ question.scores[loop.index0] }}"
+                  value="{{ loop.index0 }}"
                   class="hidden answer-radio"
+                  data-question-id="{{ question.id }}"
                 />
                 <div
                   class="w-5 h-5 border-2 border-gray-300 rounded-full mr-4 flex items-center justify-center radio-indicator"
@@ -101,37 +111,83 @@ endblock %} {% block content %}
 
       <div id="results-container" class="hidden">
         <div class="text-center">
-          <div
-            class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
-            id="result-icon"
-          >
-            <i class="bi bi-check-circle text-4xl text-white"></i>
+          <div class="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" id="result-icon">
+            <i class="bi bi-emoji-smile text-4xl"></i>
           </div>
-          <h2 class="text-3xl font-bold mb-4" id="result-title">
-            Assessment Complete
-          </h2>
-          <div class="text-6xl font-bold mb-4" id="result-score"></div>
-          <div class="text-xl font-semibold mb-4" id="result-level"></div>
-          <div class="bg-gray-100 rounded-lg p-6 mb-6">
-            <p class="text-gray-700" id="result-recommendation"></p>
+          <h2 class="text-3xl font-bold mb-4">Your Assessment Results</h2>
+          <div class="inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6" id="result-level"></div>
+          
+          <!-- Overall Score -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 text-left">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Overall Resilience Score</h3>
+            <div class="w-full bg-gray-200 rounded-full h-6 mb-4">
+              <div id="overall-score-bar" class="h-6 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-600 mb-2">
+              <span>0%</span>
+              <span id="overall-score-text" class="font-bold">0%</span>
+              <span>100%</span>
+            </div>
+            <p id="result-description" class="text-gray-700 mt-4"></p>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="{{ url_for('chatbot') }}"
-              class="block p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition duration-300"
-            >
-              <i class="bi bi-chat-heart text-blue-600 text-2xl mb-2"></i>
-              <div class="font-semibold text-blue-800">Chat Support</div>
-              <div class="text-sm text-blue-600">Talk to our AI counselor</div>
-            </a>
-            <a
-              href="{{ url_for('breathing') }}"
-              class="block p-4 bg-green-100 rounded-lg hover:bg-green-200 transition duration-300"
-            >
-              <i class="bi bi-wind text-green-600 text-2xl mb-2"></i>
-              <div class="font-semibold text-green-800">
-                Breathing Exercises
+
+          <!-- Category Scores -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
+            <!-- Resilience -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h4 class="font-semibold text-gray-800 mb-3">Resilience</h4>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div id="resilience-score-bar" class="h-4 rounded-full bg-green-500 transition-all duration-1000" style="width: 0%;"></div>
               </div>
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>0%</span>
+                <span id="resilience-score-text" class="font-medium">0%</span>
+                <span>100%</span>
+              </div>
+              <p id="resilience-level" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+
+            <!-- Depression -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h4 class="font-semibold text-gray-800 mb-3">Depression</h4>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div id="depression-score-bar" class="h-4 rounded-full bg-blue-500 transition-all duration-1000" style="width: 0%;"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>0%</span>
+                <span id="depression-score-text" class="font-medium">0%</span>
+                <span>100%</span>
+              </div>
+              <p id="depression-level" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+
+            <!-- Anxiety -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h4 class="font-semibold text-gray-800 mb-3">Anxiety</h4>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div id="anxiety-score-bar" class="h-4 rounded-full bg-purple-500 transition-all duration-1000" style="width: 0%;"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>0%</span>
+                <span id="anxiety-score-text" class="font-medium">0%</span>
+                <span>100%</span>
+              </div>
+              <p id="anxiety-level" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+
+            <!-- Stress -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h4 class="font-semibold text-gray-800 mb-3">Stress</h4>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div id="stress-score-bar" class="h-4 rounded-full bg-orange-500 transition-all duration-1000" style="width: 0%;"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>0%</span>
+                <span id="stress-score-text" class="font-medium">0%</span>
+                <span>100%</span>
+              </div>
+              <p id="stress-level" class="text-sm text-gray-600 mt-2"></p>
+            </div>
               <div class="text-sm text-green-600">Calm your mind</div>
             </a>
             <a
@@ -283,26 +339,115 @@ endblock %} {% block content %}
       document.getElementById('assessment-form').classList.add('hidden');
       document.getElementById('results-container').classList.remove('hidden');
 
-      const resultIcon = document.getElementById('result-icon');
-      const resultScore = document.getElementById('result-score');
-      const resultLevel = document.getElementById('result-level');
-      const resultRecommendation = document.getElementById('result-recommendation');
-
-      resultScore.textContent = `${data.score}/${totalQuestions * 3}`;
-      resultLevel.textContent = `${data.level} Symptoms`;
-      resultRecommendation.textContent = data.recommendation;
-
-      // Set colors based on level
-      const colorClasses = {
-          'green': ['bg-green-500', 'text-green-800'],
-          'yellow': ['bg-yellow-500', 'text-yellow-800'],
-          'orange': ['bg-orange-500', 'text-orange-800'],
-          'red': ['bg-red-500', 'text-red-800']
-      };
-
-      const colors = colorClasses[data.color] || colorClasses['green'];
-      resultIcon.className = `w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${colors[0]}`;
-      resultLevel.className = `text-xl font-semibold mb-4 ${colors[1]}`;
+      // Set overall score and level
+      document.getElementById('overall-score-text').textContent = `${data.overall_score}%`;
+      document.getElementById('result-level').textContent = data.overall_level;
+      document.getElementById('result-description').textContent = data.overall_description;
+      
+      // Set category scores and levels
+      updateCategoryScore('resilience', data.resilience);
+      updateCategoryScore('depression', data.depression);
+      updateCategoryScore('anxiety', data.anxiety);
+      updateCategoryScore('stress', data.stress);
+      
+      // Set recommendations
+      const recommendationContainer = document.getElementById('recommendation-text');
+      recommendationContainer.innerHTML = '';
+      
+      // Add overall recommendation
+      if (data.overall_recommendation) {
+          const p = document.createElement('p');
+          p.className = 'mb-4';
+          p.textContent = data.overall_recommendation;
+          recommendationContainer.appendChild(p);
+      }
+      
+      // Add category-specific recommendations
+      const resourcesContainer = document.getElementById('resources');
+      resourcesContainer.innerHTML = '';
+      
+      if (data.recommendations && data.recommendations.length > 0) {
+          const ul = document.createElement('ul');
+          ul.className = 'list-disc pl-5 space-y-2';
+          
+          data.recommendations.forEach(rec => {
+              if (rec) {  // Only add if recommendation exists
+                  const li = document.createElement('li');
+                  li.textContent = rec;
+                  ul.appendChild(li);
+              }
+          });
+          
+          resourcesContainer.appendChild(ul);
+      }
+      
+      // Animate score bars
+      setTimeout(() => {
+          animateScoreBar('overall-score-bar', data.overall_score);
+          animateScoreBar('resilience-score-bar', data.resilience.score);
+          animateScoreBar('depression-score-bar', data.depression.score);
+          animateScoreBar('anxiety-score-bar', data.anxiety.score);
+          animateScoreBar('stress-score-bar', data.stress.score);
+      }, 100);
+      
+      // Set result icon and colors based on overall level
+      updateResultIcon(data.overall_level.toLowerCase());
+  }
+  
+  function updateCategoryScore(category, data) {
+      const scoreElement = document.getElementById(`${category}-score-text`);
+      const levelElement = document.getElementById(`${category}-level`);
+      
+      if (scoreElement && levelElement) {
+          scoreElement.textContent = `${data.score}%`;
+          levelElement.textContent = data.level;
+          
+          // Set level text color based on severity
+          const level = data.level.toLowerCase();
+          if (level.includes('low') || level.includes('minimal')) {
+              levelElement.className = 'text-sm text-green-600 mt-2 font-medium';
+          } else if (level.includes('mild') || level.includes('moderate')) {
+              levelElement.className = 'text-sm text-yellow-600 mt-2 font-medium';
+          } else {
+              levelElement.className = 'text-sm text-red-600 mt-2 font-medium';
+          }
+      }
+  }
+  
+  function animateScoreBar(barId, targetPercent) {
+      const bar = document.getElementById(barId);
+      if (!bar) return;
+      
+      // Reset width to 0 before animating
+      bar.style.width = '0%';
+      
+      // Small delay to ensure reset is rendered
+      setTimeout(() => {
+          bar.style.width = `${targetPercent}%`;
+      }, 50);
+  }
+  
+  function updateResultIcon(level) {
+      const iconContainer = document.getElementById('result-icon');
+      if (!iconContainer) return;
+      
+      // Reset classes
+      iconContainer.className = 'w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center';
+      
+      // Set icon and color based on level
+      let iconClass = 'bi-emoji-smile text-4xl';
+      let bgClass = 'bg-green-100 text-green-600';
+      
+      if (level.includes('high') || level.includes('severe') || level.includes('severe')) {
+          iconClass = 'bi-emoji-frown text-4xl';
+          bgClass = 'bg-red-100 text-red-600';
+      } else if (level.includes('moderate') || level.includes('mild')) {
+          iconClass = 'bi-emoji-neutral text-4xl';
+          bgClass = 'bg-yellow-100 text-yellow-600';
+      }
+      
+      iconContainer.className += ` ${bgClass} shadow-inner`;
+      iconContainer.innerHTML = `<i class="${iconClass}"></i>`;
   }
 </script>
 {% endblock %}

@@ -1,104 +1,81 @@
-{% extends "base_new.html" %} {% block title %}{{ game.name }} - UniCare{% endblock
-%} {% block content %}
-<section class="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
+{% extends "base_new.html" %}
+
+{% block title %}{{ game.name }} - UniCare{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
   <div class="max-w-4xl mx-auto px-4">
     <div class="text-center mb-8">
-      <a
-        href="{{ url_for('games') }}"
-        class="inline-flex items-center text-blue-600 hover:text-blue-800 transition duration-300 mb-4"
-      >
+      <a href="{{ url_for('games') }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition duration-300 mb-4">
         <i class="bi bi-arrow-left mr-2"></i>Back to Games
       </a>
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">{{ game.name }}</h1>
-      <p class="text-xl text-gray-600">{{ game.description }}</p>
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">Cognitive Reframing Challenge</h1>
+      <p class="text-xl text-gray-600">Transform negative thoughts into positive ones using CBT techniques</p>
+      
+      <!-- Points and Stats -->
+      <div class="flex justify-center gap-6 mt-6 mb-8">
+        <div class="bg-white rounded-xl shadow-md p-4 flex items-center">
+          <div class="bg-indigo-100 p-3 rounded-full mr-3">
+            <i class="fas fa-star text-indigo-600"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Your Points</p>
+            <p class="text-2xl font-bold text-indigo-800" id="points-display">{{ total_points|default(0) }}</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-4 flex items-center">
+          <div class="bg-amber-100 p-3 rounded-full mr-3">
+            <i class="fas fa-trophy text-amber-600"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Level</p>
+            <p class="text-2xl font-bold text-amber-800" id="level-display">1</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-4 flex items-center">
+          <div class="bg-green-100 p-3 rounded-full mr-3">
+            <i class="fas fa-fire text-green-600"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Streak</p>
+            <p class="text-2xl font-bold text-green-800" id="streak-display">0 days</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-8">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-          Word Association Challenge
-        </h2>
-        <p class="text-gray-600">
-          Think of words that relate to the given word. The more creative, the
-          better!
-        </p>
-      </div>
-
-      <div class="max-w-2xl mx-auto">
-        <div
-          class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg p-8 mb-6 text-center"
-        >
-          <div class="text-lg font-semibold text-gray-700 mb-2">
-            Current Word:
-          </div>
-          <div class="text-4xl font-bold text-purple-600" id="current-word">
-            OCEAN
-          </div>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <!-- Challenge Card -->
+      <div class="p-8">
+        <div class="text-center mb-8">
+          <div class="inline-block bg-indigo-100 text-indigo-800 text-sm font-semibold px-4 py-1 rounded-full mb-4">
+            Challenge #<span id="challenge-number">1</span>
         </div>
-
-        <div class="mb-6">
-          <label
-            for="word-input"
-            class="block text-sm font-medium text-gray-700 mb-2"
-            >Enter a related word:</label
-          >
-          <div class="flex space-x-4">
-            <input
-              type="text"
-              id="word-input"
-              placeholder="Type your word here..."
-              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-            <button
-              id="submit-word"
-              class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-300"
-            >
-              Submit
-            </button>
-          </div>
+        <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 text-center min-w-[100px]">
+          <div class="text-sm text-gray-500">Points</div>
+          <div id="points-display" class="text-2xl font-bold text-green-600">0</div>
         </div>
-
-        <div class="grid grid-cols-3 gap-4 mb-6">
-          <div class="bg-blue-50 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-blue-600" id="score">0</div>
-            <div class="text-sm text-gray-600">Score</div>
-          </div>
-          <div class="bg-green-50 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-green-600" id="words-found">
-              0
-            </div>
-            <div class="text-sm text-gray-600">Words Found</div>
-          </div>
-          <div class="bg-purple-50 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-purple-600" id="timer">60</div>
-            <div class="text-sm text-gray-600">Time Left</div>
-          </div>
+        <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 text-center min-w-[100px]">
+          <div class="text-sm text-gray-500">Streak</div>
+          <div id="streak-display" class="text-2xl font-bold text-blue-600">0 days</div>
         </div>
-
-        <div class="mb-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-3">Your Words:</h3>
-          <div
-            id="user-words"
-            class="flex flex-wrap gap-2 min-h-[100px] p-4 bg-gray-50 rounded-lg"
-          >
-            <div class="text-gray-500 italic">
-              Your associated words will appear here...
-            </div>
-          </div>
-        </div>
-
-        <div class="text-center">
           <button
             id="new-word"
-            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 mr-4"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            New Word
+            <i class="bi bi-arrow-repeat mr-2"></i>New Word
           </button>
           <button
             id="new-game"
-            class="bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-600 transition duration-300"
+            class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
-            New Game
+            <i class="bi bi-plus-circle mr-2"></i>New Game
+          </button>
+          <button
+            id="exit-game"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <i class="bi bi-box-arrow-left mr-2"></i>Exit Game
           </button>
         </div>
 
@@ -153,102 +130,88 @@
     </div>
   </div>
 </section>
-{% endblock %} {% block scripts %}
+    </div>
+  </div>
+</section>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div class="text-center">
+      <div id="feedback-icon" class="text-5xl mb-4">🎉</div>
+      <h3 id="feedback-title" class="text-2xl font-bold text-gray-800 mb-2">Great Job!</h3>
+      <p id="feedback-message" class="text-gray-600 mb-6">You've earned <span class="font-bold text-indigo-600">10 XP</span> for completing this challenge!</p>
+      
+      <div class="bg-indigo-50 p-4 rounded-lg mb-6 text-left">
+        <h4 class="font-semibold text-indigo-800 mb-2">Your Reframe:</h4>
+        <p id="feedback-reframe" class="text-indigo-700"></p>
+      </div>
+      
+      <button 
+        id="close-feedback"
+        class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
-  class WordAssociation {
+  class CognitiveReframing {
     constructor() {
-      this.words = [
-        "OCEAN",
-        "MOUNTAIN",
-        "FOREST",
-        "CITY",
-        "MUSIC",
-        "BOOK",
-        "FIRE",
-        "STAR",
-        "FLOWER",
-        "RIVER",
-        "CLOUD",
-        "DREAM",
-        "JOURNEY",
-        "FRIEND",
-        "PEACE",
-        "LOVE",
-        "COURAGE",
-        "WISDOM",
-        "FREEDOM",
-        "ADVENTURE",
-        "MAGIC",
-        "RAINBOW",
-        "BRIDGE",
-        "LIGHT",
+      this.currentChallenge = null;
+      this.challengeNumber = 1;
+      this.totalChallenges = 0;
+      this.currentStreak = 0;
+      this.totalXP = 0;
+      this.userLevel = 1;
+      this.reframes = [];
+      
+      // CBT Distortions for guidance
+      this.distortions = [
+        'All-or-nothing thinking',
+        'Overgeneralization',
+        'Mental filter',
+        'Disqualifying the positive',
+        'Jumping to conclusions',
+        'Magnification or minimization',
+        'Emotional reasoning',
+        'Should statements',
+        'Labeling',
+        'Personalization'
       ];
-
-      this.currentWord = "";
-      this.userWords = [];
-      this.score = 0;
-      this.wordsFound = 0;
-      this.timeLeft = 60;
-      this.timer = null;
-      this.gameActive = false;
-
-      this.commonAssociations = {
-        OCEAN: [
-          "water",
-          "blue",
-          "waves",
-          "fish",
-          "salt",
-          "deep",
-          "beach",
-          "sea",
-          "whale",
-          "tide",
-        ],
-        MOUNTAIN: [
-          "high",
-          "peak",
-          "snow",
-          "climb",
-          "rock",
-          "view",
-          "tall",
-          "hill",
-          "summit",
-          "stone",
-        ],
-        FOREST: [
-          "trees",
-          "green",
-          "nature",
-          "wood",
-          "animals",
-          "leaves",
-          "wild",
-          "hiking",
-          "birds",
-          "peaceful",
-        ],
-        MUSIC: [
-          "sound",
-          "song",
-          "melody",
-          "rhythm",
-          "notes",
-          "harmony",
-          "instruments",
-          "dance",
-          "lyrics",
-          "beat",
-        ],
-      };
+      
+      // Default challenges in case API fails
+      this.defaultChallenges = [
+        { id: 1, negative_thought: "I always fail at everything I try.", category: "self_esteem" },
+        { id: 2, negative_thought: "Nobody likes me.", category: "social_anxiety" },
+        { id: 3, negative_thought: "I'll never be good enough.", category: "self_worth" },
+        { id: 4, negative_thought: "Everything is going wrong in my life.", category: "pessimism" },
+        { id: 5, negative_thought: "I can't handle this stress.", category: "anxiety" }
+      ];
+      
+      this.init();
 
       this.init();
     }
 
-    init() {
-      this.newWord();
+    async init() {
+      await this.loadChallenges();
       this.bindEvents();
+      this.updateStats();
+      this.showNewChallenge();
+      
+      // Load user data if logged in
+      if (typeof currentUser !== 'undefined' && currentUser) {
+        await this.loadUserData();
+      }
+      
+      // Focus on the input field
+      document.getElementById('reframe-input').focus();
     }
 
     bindEvents() {
@@ -273,149 +236,315 @@
 
       // Auto-focus on input
       document.getElementById("word-input").focus();
-    }
 
-    newWord() {
-      this.currentWord =
-        this.words[Math.floor(Math.random() * this.words.length)];
-      document.getElementById("current-word").textContent = this.currentWord;
-      this.userWords = [];
-      this.updateWordsDisplay();
-      this.startTimer();
-      this.gameActive = true;
-
-      document.getElementById("word-input").disabled = false;
-      document.getElementById("submit-word").disabled = false;
-      document.getElementById("word-input").focus();
-    }
-
-    startTimer() {
-      if (this.timer) clearInterval(this.timer);
-
-      this.timeLeft = 60;
-      document.getElementById("timer").textContent = this.timeLeft;
-
-      this.timer = setInterval(() => {
-        this.timeLeft--;
-        document.getElementById("timer").textContent = this.timeLeft;
-
-        if (this.timeLeft <= 0) {
-          this.endGame();
+      // Form submission
+      document.getElementById('reframe-input').addEventListener('input', (e) => {
+        const submitBtn = document.getElementById('submit-reframe');
+        submitBtn.disabled = e.target.value.trim().length < 10; // Require min 10 chars
+        
+        // Update character count
+        const charCount = e.target.value.length;
+        document.getElementById('char-count').textContent = charCount;
+      });
+      
+      // Submit reframe
+      document.getElementById('submit-reframe').addEventListener('click', (e) => {
+        e.preventDefault();
+        this.submitReframe();
+      });
+      
+      // New challenge
+      document.getElementById('new-challenge').addEventListener('click', () => {
+        this.showNewChallenge();
+      });
+      
+      // View history
+      document.getElementById('view-history').addEventListener('click', () => {
+        this.toggleHistoryView();
+      });
+      
+      // Close feedback modal
+      document.getElementById('close-feedback').addEventListener('click', () => {
+        document.getElementById('feedback-modal').classList.add('hidden');
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Ctrl+Enter to submit
+        if (e.ctrlKey && e.key === 'Enter') {
+          const submitBtn = document.getElementById('submit-reframe');
+          if (!submitBtn.disabled) {
+            this.submitReframe();
+          }
         }
-      }, 1000);
+        // N for new challenge
+        else if (e.key === 'n' && !e.ctrlKey) {
+          this.showNewChallenge();
+        }
+      });
     }
 
-    submitWord() {
-      if (!this.gameActive) return;
-
-      const input = document.getElementById("word-input");
-      const word = input.value.trim().toLowerCase();
-
-      if (!word) return;
-
-      if (this.userWords.includes(word)) {
-        this.showFeedback("You already entered that word!", "warning");
-        input.value = "";
-        return;
+    async loadChallenges() {
+      try {
+        // Try to load challenges from the API
+        const response = await fetch('/api/cognitive/challenges/random');
+        if (response.ok) {
+          const data = await response.json();
+          this.challenges = Array.isArray(data) ? data : [data];
+        } else {
+          // Use default challenges if API fails
+          this.challenges = this.defaultChallenges;
+          console.warn('Using default challenges');
+        }
+      } catch (error) {
+        console.error('Error loading challenges:', error);
+        this.challenges = this.defaultChallenges;
       }
-
-      if (word === this.currentWord.toLowerCase()) {
-        this.showFeedback("You can't use the same word!", "error");
-        input.value = "";
-        return;
+      
+      this.totalChallenges = this.challenges.length;
+    }
+    
+    async loadUserData() {
+      try {
+        // Load user achievements and stats
+        const response = await fetch('/api/user/achievements');
+        if (response.ok) {
+          const data = await response.json();
+          this.currentStreak = data.current_streak || 0;
+          this.totalXP = data.xp_earned || 0;
+          this.userLevel = data.current_level || 1;
+          this.updateStats();
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
       }
-
-      // Calculate score based on word length and creativity
-      let points = Math.max(word.length - 2, 1) * 10;
-
-      // Bonus points for less common associations
-      const commonWords = this.commonAssociations[this.currentWord] || [];
-      if (!commonWords.includes(word)) {
-        points += 20; // Creativity bonus
-      }
-
-      this.userWords.push(word);
-      this.score += points;
-      this.wordsFound++;
-
-      this.updateStats();
-      this.updateWordsDisplay();
-      this.showFeedback(`+${points} points! Great association!`, "success");
-
-      input.value = "";
-      input.focus();
+    }
+    
+    showNewChallenge() {
+      // Reset the form
+      document.getElementById('reframe-input').value = '';
+      document.getElementById('reframe-input').disabled = false;
+      document.getElementById('submit-reframe').disabled = true;
+      
+      // Get a random challenge
+      const randomIndex = Math.floor(Math.random() * this.challenges.length);
+      this.currentChallenge = this.challenges[randomIndex];
+      
+      // Update the UI
+      document.getElementById('negative-thought').textContent = this.currentChallenge.negative_thought;
+      document.getElementById('challenge-number').textContent = this.challengeNumber;
+      
+      // Hide history and show challenge
+      document.getElementById('previous-reframes').classList.add('hidden');
+      document.getElementById('reframe-input').focus();
     }
 
-    updateWordsDisplay() {
-      const container = document.getElementById("user-words");
-
-      if (this.userWords.length === 0) {
-        container.innerHTML =
-          '<div class="text-gray-500 italic">Your associated words will appear here...</div>';
+    async submitReframe() {
+      const reframeInput = document.getElementById('reframe-input');
+      const reframeText = reframeInput.value.trim();
+      
+      if (!reframeText || reframeText.length < 10) {
+        this.showFeedback('Please provide a more detailed reframe (at least 10 characters)', 'warning');
         return;
       }
+      
+      // Disable input while submitting
+      reframeInput.disabled = true;
+      document.getElementById('submit-reframe').disabled = true;
+      
+      try {
+        // Save the reframe to the database
+        const response = await fetch('/api/cognitive/responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            challenge_id: this.currentChallenge.id,
+            original_thought: this.currentChallenge.negative_thought,
+            reframed_thought: reframeText,
+            is_helpful: true // Default to true, could be made configurable
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          
+          // Update local state
+          this.reframes.unshift({
+            original: this.currentChallenge.negative_thought,
+            reframed: reframeText,
+            timestamp: new Date().toISOString(),
+            points: result.points_awarded || 10
+          });
+          
+          this.totalXP += result.points_awarded || 10;
+          this.challengeNumber++;
+          
+          // Show feedback
+          this.showFeedbackModal('Great job!', `You earned ${result.points_awarded || 10} XP!`, reframeText);
+          
+          // Update stats
+          this.updateStats();
+          
+        } else {
+          throw new Error('Failed to save response');
+        }
+      } catch (error) {
+        console.error('Error submitting reframe:', error);
+        this.showFeedback('Failed to save your response. Please try again.', 'error');
+        reframeInput.disabled = false;
+        document.getElementById('submit-reframe').disabled = false;
+      }
+    }
 
-      container.innerHTML = this.userWords
-        .map(
-          (word) =>
-            `<span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">${word}</span>`
-        )
-        .join("");
+    showFeedbackModal(title, message, reframe) {
+      const modal = document.getElementById('feedback-modal');
+      document.getElementById('feedback-title').textContent = title;
+      document.getElementById('feedback-message').innerHTML = message;
+      document.getElementById('feedback-reframe').textContent = reframe;
+      
+      // Random emoji for fun
+      const emojis = ['✨', '🌟', '🎯', '💡', '🌈', '🚀', '🎉'];
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+      document.getElementById('feedback-icon').textContent = randomEmoji;
+      
+      modal.classList.remove('hidden');
+    }
+    
+    toggleHistoryView() {
+      const historySection = document.getElementById('previous-reframes');
+      const isHidden = historySection.classList.contains('hidden');
+      
+      if (isHidden) {
+        this.showHistory();
+      } else {
+        historySection.classList.add('hidden');
+      }
+    }
+    
+    showHistory() {
+      const historySection = document.getElementById('previous-reframes');
+      const reframesList = document.getElementById('reframes-list');
+      
+      if (this.reframes.length === 0) {
+        reframesList.innerHTML = '<p class="text-gray-500 italic">No reframing history yet. Complete some challenges first!</p>';
+      } else {
+        reframesList.innerHTML = this.reframes.map((reframe, index) => `
+          <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-sm text-gray-500">${new Date(reframe.timestamp).toLocaleString()}</span>
+              <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">+${reframe.points} XP</span>
+            </div>
+            <div class="mb-2">
+              <p class="text-red-600 font-medium">${reframe.original}</p>
+              <p class="text-green-700 mt-1">${reframe.reframed}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      historySection.classList.remove('hidden');
+      historySection.scrollIntoView({ behavior: 'smooth' });
     }
 
     updateStats() {
-      document.getElementById("score").textContent = this.score;
-      document.getElementById("words-found").textContent = this.wordsFound;
+      // Update points display
+      document.getElementById('points-display').textContent = this.totalXP;
+      document.getElementById('level-display').textContent = this.userLevel;
+      document.getElementById('streak-display').textContent = `${this.currentStreak} day${this.currentStreak !== 1 ? 's' : ''}`;
+      
+      // Update challenge counter
+      document.getElementById('challenges-completed').textContent = this.reframes.length;
+      document.getElementById('current-streak').textContent = this.currentStreak;
+      document.getElementById('xp-earned').textContent = this.totalXP;
     }
 
     showFeedback(message, type) {
-      const feedback = document.getElementById("feedback");
+      const feedback = document.createElement('div');
       const colors = {
-        success: "bg-green-100 text-green-800",
-        warning: "bg-yellow-100 text-yellow-800",
-        error: "bg-red-100 text-red-800",
+        success: 'bg-green-100 text-green-800 border-green-200',
+        error: 'bg-red-100 text-red-800 border-red-200',
+        warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        info: 'bg-blue-100 text-blue-800 border-blue-200'
       };
-
-      feedback.className = `mt-6 p-4 rounded-lg text-center ${colors[type]}`;
-      feedback.innerHTML = message;
-      feedback.classList.remove("hidden");
-
+      
+      feedback.className = `fixed bottom-4 right-4 px-4 py-3 rounded-lg border ${colors[type] || colors.info} shadow-lg z-50 max-w-sm`;
+      feedback.textContent = message;
+      
+      document.body.appendChild(feedback);
+      
+      // Auto-remove after 3 seconds
       setTimeout(() => {
-        feedback.classList.add("hidden");
-      }, 2000);
+        feedback.style.opacity = '0';
+        feedback.style.transition = 'opacity 0.5s';
+        setTimeout(() => feedback.remove(), 500);
+      }, 3000);
     }
 
-    endGame() {
-      this.gameActive = false;
-      clearInterval(this.timer);
-
-      document.getElementById("word-input").disabled = true;
-      document.getElementById("submit-word").disabled = true;
-
-      document.getElementById("final-score").textContent = this.score;
-      document.getElementById("final-words").textContent = this.wordsFound;
-      document.getElementById("game-over").classList.remove("hidden");
+    // Helper function to calculate level from XP
+    calculateLevel(xp) {
+      return Math.floor(Math.sqrt(xp / 100)) + 1;
+    }
+    
+    // Helper function to get random tip
+    getRandomTip() {
+      const tips = [
+        'Try to identify the cognitive distortion in the negative thought.',
+        'Ask yourself: "Is there evidence that contradicts this thought?"',
+        'Consider how you would advise a friend who had this thought.',
+        'Look for alternative explanations or perspectives.',
+        'Challenge all-or-nothing thinking with more balanced language.'
+      ];
+      return tips[Math.floor(Math.random() * tips.length)];
     }
 
-    reset() {
-      clearInterval(this.timer);
-      this.score = 0;
-      this.wordsFound = 0;
-      this.userWords = [];
-      this.gameActive = false;
+    // Clean up when navigating away
+    cleanup() {
+      // Save any unsaved progress
+      if (this.currentChallenge) {
+        // Could implement auto-save here if needed
+      }
+    }
 
-      this.updateStats();
-      this.updateWordsDisplay();
-
-      document.getElementById("timer").textContent = "60";
-      document.getElementById("feedback").classList.add("hidden");
-
-      this.newWord();
+    // Handle page unload
+    setupBeforeUnload() {
+      window.addEventListener('beforeunload', (e) => {
+        if (this.currentChallenge) {
+          // Notify user they have unsaved changes
+          e.preventDefault();
+          e.returnValue = 'You have an unsaved reframe. Are you sure you want to leave?';
+          return e.returnValue;
+        }
+      });
     }
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    new WordAssociation();
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the game
+    const game = new CognitiveReframing();
+    
+    // Make game instance available globally for debugging
+    window.cognitiveGame = game;
+    
+    // Set up beforeunload handler
+    game.setupBeforeUnload();
+    
+    // Initialize tooltips if using a library like Tippy.js
+    if (typeof tippy === 'function') {
+      tippy('[data-tippy-content]');
+    }
+    
+    // Handle exit button if it exists
+    const exitButton = document.getElementById('exit-game');
+    if (exitButton) {
+      exitButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        game.cleanup();
+        window.location.href = '/games';
+      });
+    }
   });
 </script>
 {% endblock %}

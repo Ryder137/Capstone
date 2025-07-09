@@ -1,0 +1,591 @@
+{% extends "admin_base.html" %}
+
+{% block title %}User Well-being Dashboard - Admin{% endblock %}
+
+{% block content %}
+<div class="py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="pb-5 border-b border-gray-200 sm:flex sm:items-center sm:justify-between">
+      <h1 class="text-2xl font-semibold text-gray-900">User Well-being Dashboard</h1>
+      <div class="mt-3 sm:mt-0 sm:ml-4">
+        <a href="{{ url_for('admin_users') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <i class="bi bi-people mr-2"></i> View All Users
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+      <!-- Total Users -->
+      <div class="flex items-center p-4 bg-white rounded-lg shadow-xs">
+        <div class="p-3 mr-4 text-blue-500 bg-blue-100 rounded-full">
+          <i class="bi bi-people-fill text-xl"></i>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-medium text-gray-600">Total Users</p>
+          <p class="text-lg font-semibold text-gray-700" id="totalUsers">0</p>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="flex items-center p-4 bg-white rounded-lg shadow-xs">
+        <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
+          <i class="bi bi-activity text-xl"></i>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-medium text-gray-600">Active Users</p>
+          <p class="text-lg font-semibold text-gray-700" id="activeUsers">0</p>
+          <p class="text-xs text-green-600 font-medium">
+            <span id="engagementRate">0</span>% engagement rate
+          </p>
+        </div>
+      </div>
+
+      <!-- Needs Attention -->
+      <div class="flex items-center p-4 bg-white rounded-lg shadow-xs">
+        <div class="p-3 mr-4 text-yellow-500 bg-yellow-100 rounded-full">
+          <i class="bi bi-exclamation-triangle text-xl"></i>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-medium text-gray-600">Need Attention</p>
+          <div class="flex items-center">
+            <p class="text-lg font-semibold text-gray-700 mr-2" id="needsAttention">0</p>
+            <span class="flex items-center text-xs font-semibold text-red-500">
+              <i class="bi bi-arrow-up-short"></i>
+              <span id="attentionTrend">0</span>%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Average Mood -->
+      <div class="flex items-center p-4 bg-white rounded-lg shadow-xs">
+        <div class="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full">
+          <i class="bi bi-emoji-smile text-xl"></i>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-medium text-gray-600">Avg. Mood</p>
+          <div class="flex items-center">
+            <p class="text-lg font-semibold text-gray-700 mr-2" id="avgMood">-</p>
+            <span class="flex items-center text-xs font-semibold text-green-500">
+              <i class="bi bi-arrow-up-short" id="moodTrendIcon"></i>
+              <span id="moodTrend">0</span>%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Needing Attention -->
+    <div class="w-full overflow-hidden rounded-lg shadow-xs mb-8">
+      <div class="w-full overflow-x-auto">
+        <div class="flex items-center justify-between p-4 bg-white rounded-t-lg border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Users Needing Attention</h2>
+          <div class="flex items-center space-x-2">
+            <button class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
+              <i class="bi bi-download mr-1"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="w-full overflow-hidden">
+          <table class="w-full whitespace-no-wrap">
+            <thead>
+              <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
+                <th class="px-4 py-3">User</th>
+                <th class="px-4 py-3">Last Activity</th>
+                <th class="px-4 py-3">Concern Level</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y" id="usersNeedingAttention">
+              <tr>
+                <td colspan="4" class="px-4 py-3 text-center text-gray-500">Loading users...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mood Trends -->
+    <div class="w-full overflow-hidden rounded-lg shadow-xs mb-8">
+      <div class="w-full overflow-x-auto">
+        <div class="p-4 bg-white rounded-t-lg border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Mood Trends</h2>
+          <p class="text-sm text-gray-500 mt-1">Average mood scores over the last 30 days</p>
+        </div>
+        <div class="p-4 bg-white">
+          <div class="relative h-80">
+            <canvas id="moodTrendsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Well-being Modal -->
+<div id="userWellbeingModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center pb-3">
+      <h3 class="text-xl font-semibold text-gray-800" id="userWellbeingTitle">User Well-being</h3>
+      <button onclick="closeUserWellbeingModal()" class="text-gray-500 hover:text-gray-700">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="py-4" id="userWellbeingContent">
+      <!-- Content will be loaded dynamically -->
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let moodTrendsChart;
+let currentUserId = null;
+
+// Initialize the dashboard
+document.addEventListener('DOMContentLoaded', function() {
+  fetchWellbeingData();
+  
+  // Refresh data every 5 minutes
+  setInterval(fetchWellbeingData, 5 * 60 * 1000);
+});
+
+// Fetch wellbeing data from the server
+function fetchWellbeingData() {
+  fetch('/admin/api/wellbeing/overview')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        updateDashboard(data);
+      } else {
+        console.error('Failed to fetch wellbeing data:', data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching wellbeing data:', error);
+    });
+}
+
+// Update the dashboard with fetched data
+function updateDashboard(data) {
+  const { stats, users } = data;
+  
+  // Update stats cards
+  document.getElementById('totalUsers').textContent = stats.total_users;
+  document.getElementById('activeUsers').textContent = stats.active_users;
+  document.getElementById('needsAttention').textContent = stats.needs_attention;
+  document.getElementById('engagementRate').textContent = stats.engagement_rate.toFixed(1);
+  
+  // Update users needing attention
+  updateUsersNeedingAttention(users);
+  
+  // Update charts
+  updateMoodTrendsChart(users);
+}
+
+// Update users needing attention list
+function updateUsersNeedingAttention(users) {
+  const container = document.getElementById('usersNeedingAttention');
+  
+  // Filter users needing attention
+  const usersNeedingAttention = users.filter(user => 
+    user.needs_follow_up_count > 0 || user.negative_entries_count >= 3
+  );
+  
+  if (usersNeedingAttention.length === 0) {
+    container.innerHTML = `
+      <li class="p-6 text-center">
+        <i class="bi bi-check-circle text-green-500 text-4xl mb-2"></i>
+        <p class="text-gray-500">No users currently need attention</p>
+      </li>`;
+    return;
+  }
+  
+  let html = '';
+  usersNeedingAttention.slice(0, 10).forEach(user => {
+    const concernLevel = Math.min(100, (user.needs_follow_up_count * 20) + (user.negative_entries_count * 10));
+    const lastEntry = user.last_entry_date ? new Date(user.last_entry_date).toLocaleDateString() : 'No entries';
+    
+    html += `
+    <li class="border-b border-gray-200">
+      <div class="px-4 py-4 flex items-center sm:px-6">
+        <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+          <div class="truncate">
+            <div class="flex text-sm">
+              <p class="font-medium text-blue-600 truncate">${user.full_name || user.email}</p>
+              <p class="ml-1 flex-shrink-0 font-normal text-gray-500">${user.email}</p>
+            </div>
+            <div class="mt-2 flex">
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="bi bi-journal-text mr-1.5"></i>
+                <p>${user.journal_count || 0} entries</p>
+              </div>
+              <div class="ml-3 flex items-center text-sm text-gray-500">
+                <i class="bi bi-calendar3 mr-1.5"></i>
+                <p>Last: ${lastEntry}</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
+            <div class="flex items-center">
+              <div class="w-24 mr-4">
+                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="h-full ${getConcernLevelColor(concernLevel)}" style="width: ${concernLevel}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">${Math.round(concernLevel)}% concern</p>
+              </div>
+              <button onclick="viewUserWellbeing('${user.user_id}')" class="px-3 py-1 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                View
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>`;
+  });
+  
+  container.innerHTML = html;
+}
+
+// Get color based on concern level
+function getConcernLevelColor(level) {
+  if (level >= 70) return 'bg-red-500';
+  if (level >= 40) return 'bg-yellow-500';
+  return 'bg-green-500';
+}
+
+// Update mood trends chart
+function updateMoodTrendsChart(users) {
+  const ctx = document.getElementById('moodTrendsChart').getContext('2d');
+  
+  // Prepare data for the chart
+  const activeUsers = users.filter(u => u.journal_count > 0);
+  const labels = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
+  const moodData = [0, 0, 0, 0, 0];
+  
+  activeUsers.forEach(user => {
+    const mood = Math.round(user.avg_mood || 3);
+    if (mood >= 1 && mood <= 5) {
+      moodData[mood - 1]++;
+    }
+  });
+  
+  // Destroy previous chart if it exists
+  if (moodTrendsChart) {
+    moodTrendsChart.destroy();
+  }
+  
+  // Create new chart
+  moodTrendsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Number of Users',
+        data: moodData,
+        backgroundColor: [
+          'rgba(239, 68, 68, 0.7)',  // Red for very low
+          'rgba(249, 115, 22, 0.7)', // Orange for low
+          'rgba(234, 179, 8, 0.7)',  // Yellow for moderate
+          'rgba(34, 197, 94, 0.7)',  // Green for high
+          'rgba(16, 185, 129, 0.7)'  // Emerald for very high
+        ],
+        borderColor: [
+          'rgba(239, 68, 68, 1)',
+          'rgba(249, 115, 22, 1)',
+          'rgba(234, 179, 8, 1)',
+          'rgba(34, 197, 94, 1)',
+          'rgba(16, 185, 129, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.parsed.y} users`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// View user wellbeing details
+function viewUserWellbeing(userId) {
+  currentUserId = userId;
+  const modal = document.getElementById('userWellbeingModal');
+  const content = document.getElementById('userWellbeingContent');
+  
+  // Show loading state
+  content.innerHTML = `
+    <div class="text-center py-8">
+      <i class="bi bi-arrow-repeat animate-spin text-4xl text-blue-500"></i>
+      <p class="mt-2 text-gray-600">Loading user data...</p>
+    </div>`;
+  
+  // Show modal
+  modal.classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+  
+  // Fetch user wellbeing data
+  fetch(`/admin/api/wellbeing/user/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        renderUserWellbeing(data);
+      } else {
+        throw new Error(data.error || 'Failed to load user data');
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching user wellbeing:', error);
+      content.innerHTML = `
+        <div class="text-center py-8">
+          <i class="bi bi-exclamation-triangle text-4xl text-red-500"></i>
+          <p class="mt-2 text-red-600">Error loading user data</p>
+          <p class="text-sm text-gray-500 mt-1">${error.message}</p>
+          <button onclick="closeUserWellbeingModal()" class="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md">
+            Close
+          </button>
+        </div>`;
+    });
+}
+
+// Render user wellbeing data in the modal
+function renderUserWellbeing(data) {
+  const { user, stats, trends, concerning_entries, recommendations } = data;
+  const content = document.getElementById('userWellbeingContent');
+  
+  // Format the user info section
+  let html = `
+    <div class="space-y-6">
+      <!-- User Header -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="flex items-center">
+          <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600">
+            ${user.email ? user.email[0].toUpperCase() : 'U'}
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900">${user.full_name || user.email}</h3>
+            <p class="text-sm text-gray-500">Joined on ${new Date(user.created_at).toLocaleDateString()}</p>
+            <div class="mt-1 flex items-center">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${user.is_active ? 'Active' : 'Inactive'}
+              </span>
+              ${user.is_admin ? '<span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Admin</span>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="bg-white p-4 rounded-lg shadow">
+          <p class="text-sm font-medium text-gray-500">Journal Entries</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">${stats.total_entries}</p>
+          <p class="text-xs text-gray-500">Last: ${stats.last_entry ? new Date(stats.last_entry).toLocaleString() : 'Never'}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <p class="text-sm font-medium text-gray-500">Average Mood</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">${stats.avg_mood ? stats.avg_mood.toFixed(1) : 'N/A'}/5</p>
+          <p class="text-xs text-gray-500">Based on last 50 entries</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <p class="text-sm font-medium text-gray-500">Concern Level</p>
+          <div class="mt-1 flex items-center">
+            <div class="w-3/4 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full ${getConcernLevelColor(stats.concern_level)}" style="width: ${stats.concern_level}%"></div>
+            </div>
+            <span class="ml-2 text-sm font-medium">${Math.round(stats.concern_level)}%</span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Based on recent entries</p>
+        </div>
+      </div>`;
+  
+  // Add recommendations if any
+  if (recommendations && recommendations.length > 0) {
+    html += `
+      <!-- Recommendations -->
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="bi-lightbulb text-yellow-400 text-xl"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800">Recommended Actions</h3>
+            <div class="mt-2 text-sm text-yellow-700">
+              <ul class="list-disc pl-5 space-y-1">
+                ${recommendations.map(rec => 
+                  `<li>
+                    <strong>${rec.title}:</strong> ${rec.description}
+                    <a href="${rec.link}" class="text-blue-600 hover:underline ml-1">View resources</a>
+                  </li>`
+                ).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  
+  // Add concerning entries if any
+  if (concerning_entries && concerning_entries.length > 0) {
+    html += `
+      <!-- Concerning Entries -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Concerning Entries</h3>
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul class="divide-y divide-gray-200">
+            ${concerning_entries.map(entry => `
+              <li class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-blue-600 truncate">
+                    ${new Date(entry.created_at).toLocaleString()}
+                  </p>
+                  <div class="ml-2 flex-shrink-0 flex">
+                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${entry.sentiment_score < -0.5 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                      ${entry.sentiment_score < -0.5 ? 'High Concern' : 'Moderate Concern'}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-900">${entry.content || 'No content'}</p>
+                </div>
+                ${entry.notes ? `
+                <div class="mt-2 bg-gray-50 p-2 rounded">
+                  <p class="text-xs text-gray-500">Admin Notes:</p>
+                  <p class="text-sm text-gray-700">${entry.notes}</p>
+                </div>` : ''}
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>`;
+  }
+  
+  // Add mood trends chart
+  if (trends && trends.mood && trends.mood.length > 0) {
+    html += `
+      <!-- Mood Trends -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Mood Trends</h3>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <canvas id="userMoodChart" height="200"></canvas>
+        </div>
+      </div>`;
+  }
+  
+  // Add action buttons
+  html += `
+    <div class="flex justify-end space-x-3 pt-4 border-t">
+      <button onclick="closeUserWellbeingModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+        Close
+      </button>
+      <a href="mailto:${user.email}" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+        <i class="bi-envelope mr-2"></i>Send Message
+      </a>
+    </div>`;
+  
+  content.innerHTML = html;
+  
+  // Initialize mood chart if needed
+  if (trends && trends.mood && trends.mood.length > 0) {
+    initializeUserMoodChart(trends.mood);
+  }
+}
+
+// Initialize mood chart for user view
+function initializeUserMoodChart(moodData) {
+  const ctx = document.getElementById('userMoodChart').getContext('2d');
+  
+  // Sort data by date
+  const sortedData = [...moodData].sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sortedData.map(entry => new Date(entry.date).toLocaleDateString()),
+      datasets: [{
+        label: 'Mood (1-5)',
+        data: sortedData.map(entry => entry.value),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: 'rgb(59, 130, 246)',
+        pointBorderColor: '#fff',
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: 'rgb(59, 130, 246)',
+        pointHoverBorderColor: '#fff',
+        pointHitRadius: 10,
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: false,
+          min: 1,
+          max: 5,
+          ticks: {
+            stepSize: 1
+          }
+        },
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `Mood: ${context.parsed.y}/5`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Close user wellbeing modal
+function closeUserWellbeingModal() {
+  document.getElementById('userWellbeingModal').classList.add('hidden');
+  document.body.classList.remove('overflow-hidden');
+  currentUserId = null;
+}
+</script>
+{% endblock %}

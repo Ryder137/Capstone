@@ -1,0 +1,519 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Analytics Dashboard - UniCare Admin{% endblock %}
+
+{% block extra_css %}
+<!-- Additional CSS for charts -->
+<style>
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+  @media (min-width: 1024px) {
+    .chart-container {
+      height: 350px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Page Header -->
+  <div class="sm:flex sm:items-center mb-8">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Analytics Dashboard</h1>
+      <p class="mt-2 text-sm text-gray-700">Track user activities and platform metrics in real-time.</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <div class="flex space-x-3">
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <i class="bi bi-download mr-2"></i> Export
+        </button>
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <i class="bi bi-arrow-clockwise mr-2"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Range Picker -->
+  <div class="bg-white shadow rounded-lg mb-8 p-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex items-center">
+        <label for="date-range" class="block text-sm font-medium text-gray-700 mr-2">Date Range:</label>
+        <select id="date-range" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>Last 90 days</option>
+          <option>This year</option>
+          <option>Custom range</option>
+        </select>
+      </div>
+      <div class="text-sm text-gray-500">
+        <i class="bi bi-info-circle mr-1"></i> Data updates every 15 minutes
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+  <!-- Top Content Table -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Top Content</h3>
+        <button type="button" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          View All
+        </button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unique Visitors</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg. Time</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bounce Rate</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">/dashboard</div>
+              <div class="text-sm text-gray-500">Dashboard</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">2,459</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">1,248</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">5m 23s</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                32.1%
+              </span>
+            </td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">/assessments</div>
+              <div class="text-sm text-gray-500">Assessments</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1,853</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1,023</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3m 45s</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                45.6%
+              </span>
+            </td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">/resources</div>
+              <div class="text-sm text-gray-500">Resources</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1,327</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">845</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2m 12s</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                51.2%
+              </span>
+            </td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">/profile</div>
+              <div class="text-sm text-gray-500">User Profile</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1,125</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">723</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1m 58s</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                48.7%
+              </span>
+            </td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">/settings</div>
+              <div class="text-sm text-gray-500">Account Settings</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">987</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">654</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2m 45s</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                42.3%
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Previous
+        </a>
+        <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Next
+        </a>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">24</span> results
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Previous</span>
+              <i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              1
+            </a>
+            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              2
+            </a>
+            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              3
+            </a>
+            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+              ...
+            </span>
+            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              8
+            </a>
+            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Next</span>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Bounce Rate Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-500 text-white">
+              <i class="bi bi-arrow-repeat text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Bounce Rate</dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">42.8%</div>
+                <div class="text-sm text-green-600">
+                  <span class="inline-flex items-center">
+                    <i class="bi bi-arrow-down mr-1"></i>
+                    1.1% from last week
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Users Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+              <i class="bi bi-people text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Active Users</dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">1,248</div>
+                <div class="text-sm text-green-600">
+                  <span class="inline-flex items-center">
+                    <i class="bi bi-arrow-up mr-1"></i>
+                    12.5% from last week
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
+              <i class="bi bi-graph-up-arrow text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Sessions</dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">3,895</div>
+                <div class="text-sm text-green-600">
+                  <span class="inline-flex items-center">
+                    <i class="bi bi-arrow-up mr-1"></i>
+                    8.2% from last week
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avg. Session Duration Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-500 text-white">
+              <i class="bi bi-clock-history text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Avg. Session</dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">4m 32s</div>
+                <div class="text-sm text-red-600">
+                  <span class="inline-flex items-center">
+                    <i class="bi bi-arrow-down mr-1"></i>
+                    2.3% from last week
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- User Activity Chart -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">User Activity</h3>
+          <div class="relative">
+            <select class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>Last 90 days</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i class="bi bi-chevron-down text-xs"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-4 py-5 sm:p-6">
+        <div class="chart-container">
+          <canvas id="userActivityChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- User Retention Chart -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">User Retention</h3>
+          <div class="relative">
+            <select class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>Last 90 days</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <i class="bi bi-chevron-down text-xs"></i>
+            </div>
+          </div>
+        </div>
+        <div class="h-80">
+          <canvas id="retentionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Chart configuration
+      Chart.defaults.font.family = 'Inter, system-ui, -apple-system, sans-serif';
+      Chart.defaults.plugins.legend.display = false;
+      
+      // User Activity Chart
+      const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+      const userActivityChart = new Chart(userActivityCtx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Active Users',
+              data: [650, 590, 800, 810, 560, 550, 400],
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+              pointBackgroundColor: '#fff',
+              pointBorderColor: '#3B82F6',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: '#1F2937',
+              titleFont: { size: 12, weight: '500' },
+              bodyFont: { size: 14, weight: '600' },
+              padding: 12,
+              cornerRadius: 8,
+              displayColors: false,
+              callbacks: {
+                label: function(context) {
+                  return ' ' + context.parsed.y.toLocaleString() + ' users';
+                }
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: true,
+                drawBorder: false,
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                color: '#6B7280',
+                font: { size: 12 },
+                padding: 8,
+                callback: function(value) {
+                  return value.toLocaleString();
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false,
+                drawBorder: false
+              },
+              ticks: {
+                color: '#6B7280',
+                font: { size: 12 },
+                padding: 8
+              }
+            }
+          }
+        }
+      });
+
+      // User Retention Chart
+      const userRetentionCtx = document.getElementById('retentionChart').getContext('2d');
+      const userRetentionChart = new Chart(userRetentionCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+          datasets: [
+            {
+              label: 'Retention Rate',
+              data: [100, 85, 75, 65, 58, 52, 48],
+              backgroundColor: [
+                'rgba(16, 185, 129, 0.9)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(16, 185, 129, 0.7)',
+                'rgba(16, 185, 129, 0.6)',
+                'rgba(16, 185, 129, 0.5)',
+                'rgba(16, 185, 129, 0.4)',
+                'rgba(16, 185, 129, 0.3)'
+              ],
+              borderRadius: 4,
+              borderWidth: 0,
+              maxBarThickness: 40
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#1F2937',
+              titleFont: { size: 12, weight: '500' },
+              bodyFont: { size: 14, weight: '600' },
+              padding: 12,
+              cornerRadius: 8,
+              displayColors: false,
+              callbacks: {
+                label: function(context) {
+                  return ' ' + context.raw + '% retention';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              },
+              max: 100
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

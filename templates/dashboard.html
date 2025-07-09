@@ -81,6 +81,76 @@ block content %}
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Latest Assessment Summary -->
+      {% if latest_summary %}
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-md p-6 mb-8 border border-blue-100">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Your Latest Assessment</h2>
+          <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if latest_summary.overall_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.overall_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+            {{ latest_summary.overall_level }}
+          </span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Resilience</p>
+            <div class="flex items-center mt-1">
+              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.resilience_score) }}</span>
+              <span class="ml-1 text-xs text-gray-500">/100</span>
+            </div>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.resilience_level in ['High', 'Very High'] else 'bg-yellow-100 text-yellow-800' if latest_summary.resilience_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+                {{ latest_summary.resilience_level }}
+              </span>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Depression</p>
+            <div class="flex items-center mt-1">
+              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.depression_score) }}</span>
+              <span class="ml-1 text-xs text-gray-500">/27</span>
+            </div>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.depression_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.depression_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+                {{ latest_summary.depression_level }}
+              </span>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Anxiety</p>
+            <div class="flex items-center mt-1">
+              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.anxiety_score) }}</span>
+              <span class="ml-1 text-xs text-gray-500">/21</span>
+            </div>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.anxiety_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.anxiety_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+                {{ latest_summary.anxiety_level }}
+              </span>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Stress</p>
+            <div class="flex items-center mt-1">
+              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.stress_score) }}</span>
+              <span class="ml-1 text-xs text-gray-500">/21</span>
+            </div>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.stress_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.stress_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+                {{ latest_summary.stress_level }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <p class="text-sm text-gray-600">
+            Last updated: {{ latest_summary.created_at.strftime('%B %d, %Y') }}
+          </p>
+          <a href="{{ url_for('assessment_history') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+            View full history →
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Recent Assessments -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">
@@ -89,9 +159,8 @@ block content %}
         {% if assessments %}
         <div class="space-y-4">
           {% for assessment in assessments[:3] %}
-          <div
-            class="border-l-4 {% if assessment.level == 'Minimal' %}border-green-500{% elif assessment.level == 'Mild' %}border-yellow-500{% elif assessment.level == 'Moderate' %}border-orange-500{% else %}border-red-500{% endif %} pl-4 py-2"
-          >
+          {% set border_color = 'border-green-500' if assessment.level == 'Minimal' else 'border-yellow-500' if assessment.level == 'Mild' else 'border-orange-500' if assessment.level == 'Moderate' else 'border-red-500' %}
+          <div class="border-l-4 {{ border_color }} pl-4 py-2">
             <div class="flex justify-between items-center">
               <div>
                 <p class="font-medium text-gray-800">
@@ -109,11 +178,9 @@ block content %}
           {% endfor %}
         </div>
         <div class="mt-4">
-          <a
-            href="{{ url_for('assessment') }}"
-            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >Take New Assessment →</a
-          >
+            <a href="{{ url_for('assessment') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Take New Assessment →
+            </a>
         </div>
         {% else %}
         <div class="text-center py-8">
@@ -163,7 +230,7 @@ block content %}
               <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
                 <div
                   class="bg-red-500 h-2 rounded-full"
-                  style="width: {{ (journal_stats[0].avg_anxiety / 10) * 100 }}%"
+                  style="width: {{ ((journal_stats[0].avg_anxiety / 10) * 100)|int }}%"
                 ></div>
               </div>
               <span class="text-sm font-medium"
@@ -180,7 +247,7 @@ block content %}
               <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
                 <div
                   class="bg-orange-500 h-2 rounded-full"
-                  style="width: {{ (journal_stats[0].avg_stress / 10) * 100 }}%"
+                  style="width: {{ ((journal_stats[0].avg_stress / 10) * 100)|int }}%"
                 ></div>
               </div>
               <span class="text-sm font-medium"
@@ -301,6 +368,52 @@ block content %}
       </div>
     </div>
 
+    <!-- Plant Widget -->
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">My Plant</h2>
+        <div class="flex items-center space-x-2">
+          <button onclick="openPlantSelection()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
+            <i class="bi bi-arrow-repeat"></i> Change Plant
+          </button>
+          <div id="points-counter" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+            <i class="bi bi-coin"></i> <span id="game-points">0</span> points
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center py-6">
+        <div id="plant-container" class="relative mx-auto w-48 h-48 flex flex-col items-center">
+          <!-- Pot -->
+          <div class="w-32 h-16 bg-amber-600 rounded-b-lg relative z-10">
+            <div class="absolute -top-1 w-full h-2 bg-amber-700 rounded-t-sm"></div>
+          </div>
+          <!-- Soil -->
+          <div class="w-36 h-4 bg-amber-800 -mt-1 rounded-t-md"></div>
+          <!-- Plant will be rendered here by JavaScript -->
+          <div id="plant" class="relative z-0 -mb-4 transition-all duration-500 transform">
+            <!-- Plant will be rendered here -->
+          </div>
+        </div>
+        
+        <div id="plant-status" class="mt-4 text-gray-600">
+          Your plant is ready to grow!<br>
+          <span id="growth-percentage" class="font-medium">0%</span> grown
+        </div>
+        
+        <div class="mt-4 space-x-2" id="water-buttons">
+          <button onclick="waterPlant(1)" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition">
+            Water (1 point)
+          </button>
+          <button onclick="waterPlant(5)" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition">
+            Water (5 points)
+          </button>
+        </div>
+        
+        <div id="plant-message" class="mt-3 text-sm text-green-600"></div>
+      </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="mt-8 bg-white rounded-lg shadow-md p-6">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
@@ -337,4 +450,231 @@ block content %}
     </div>
   </div>
 </section>
+
+<!-- Plant Selection Modal -->
+<div id="plant-selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl p-6 w-full max-w-md">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-gray-800">Choose Your Plant</h3>
+      <button onclick="closePlantSelection()" class="text-gray-500 hover:text-gray-700">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4">
+      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('sunflower')">
+        <div class="text-5xl mb-2">🌻</div>
+        <h4 class="font-medium">Sunflower</h4>
+        <p class="text-sm text-gray-500">Grows with positivity</p>
+      </div>
+      
+      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('cactus')">
+        <div class="text-5xl mb-2">🌵</div>
+        <h4 class="font-medium">Cactus</h4>
+        <p class="text-sm text-gray-500">Thrives in tough times</p>
+      </div>
+      
+      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('rose')">
+        <div class="text-5xl mb-2">🌹</div>
+        <h4 class="font-medium">Rose</h4>
+        <p class="text-sm text-gray-500">Beauty in progress</p>
+      </div>
+      
+      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('bamboo')">
+        <div class="text-5xl mb-2">🎍</div>
+        <h4 class="font-medium">Bamboo</h4>
+        <p class="text-sm text-gray-500">Grows with patience</p>
+      </div>
+    </div>
+    
+    <div class="mt-6 flex justify-end">
+      <button onclick="closePlantSelection()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+// Plant growth stages (0-100%)
+const PLANT_STAGES = {
+  sunflower: [
+    { stage: 0, emoji: '🌱', message: 'Just planted a sunflower!' },
+    { stage: 20, emoji: '🌿', message: 'Your sunflower is sprouting!' },
+    { stage: 50, emoji: '🌻', message: 'Your sunflower is growing tall!' },
+    { stage: 80, emoji: '🌻🌻', message: 'Your sunflower is almost fully grown!' },
+    { stage: 100, emoji: '🌻🌻🌻', message: 'Your sunflower is in full bloom!' }
+  ],
+  cactus: [
+    { stage: 0, emoji: '🌵', message: 'A tiny cactus has been planted!' },
+    { stage: 20, emoji: '🌵', message: 'Your cactus is growing slowly...' },
+    { stage: 50, emoji: '🌵🌵', message: 'Your cactus is getting bigger!' },
+    { stage: 80, emoji: '🌵🌵🌵', message: 'Your cactus is thriving!' },
+    { stage: 100, emoji: '🌵🌸', message: 'Your cactus is blooming!' }
+  ],
+  rose: [
+    { stage: 0, emoji: '🌱', message: 'A rose has been planted!' },
+    { stage: 20, emoji: '🌿', message: 'Your rose bush is growing!' },
+    { stage: 50, emoji: '🌹', message: 'Your rose has buds!' },
+    { stage: 80, emoji: '🌹🌹', message: 'Your roses are almost ready!' },
+    { stage: 100, emoji: '🌹🌹🌹', message: 'Your roses are in full bloom!' }
+  ],
+  bamboo: [
+    { stage: 0, emoji: '🎍', message: 'A bamboo shoot has been planted!' },
+    { stage: 20, emoji: '🎍', message: 'Your bamboo is growing slowly...' },
+    { stage: 50, emoji: '🎍🎍', message: 'Your bamboo is getting taller!' },
+    { stage: 80, emoji: '🎍🎍🎍', message: 'Your bamboo is growing fast!' },
+    { stage: 100, emoji: '🎋', message: 'Your bamboo is fully grown!' }
+  ]
+};
+
+let currentPlant = {
+  growth: 0,
+  type: 'sunflower',
+  lastWatered: null
+};
+
+// Plant selection modal functions
+function openPlantSelection() {
+  document.getElementById('plant-selection-modal').classList.remove('hidden');
+}
+
+function closePlantSelection() {
+  document.getElementById('plant-selection-modal').classList.add('hidden');
+}
+
+async function selectPlant(plantType) {
+  try {
+    const response = await fetch('/api/plants/select', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ plant_type: plantType })
+    });
+    
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      currentPlant.type = plantType;
+      updatePlantDisplay();
+      showMessage(result.message);
+      closePlantSelection();
+    } else {
+      showMessage(result.message || 'Failed to change plant', 'error');
+    }
+  } catch (error) {
+    console.error('Error selecting plant:', error);
+    showMessage('Error changing plant. Please try again.', 'error');
+  }
+}
+
+// Initialize plant from server data
+function initPlant(plantData) {
+  if (plantData) {
+    currentPlant = {
+      growth: plantData.growth_stage || 0,
+      type: plantData.plant_type || 'sunflower',
+      lastWatered: plantData.last_watered
+    };
+  }
+  updatePlantDisplay();
+  updateGamePoints();
+}
+
+// Update the plant display based on growth stage
+function updatePlantDisplay() {
+  const plantElement = document.getElementById('plant');
+  const statusElement = document.getElementById('plant-status');
+  
+  // Get the stages for the current plant type
+  const stages = PLANT_STAGES[currentPlant.type] || PLANT_STAGES.sunflower;
+  
+  // Find the appropriate growth stage
+  let currentStage = stages[0];
+  for (const stage of [...stages].reverse()) {
+    if (currentPlant.growth >= stage.stage) {
+      currentStage = stage;
+      break;
+    }
+  }
+  
+  // Update the display
+  plantElement.innerHTML = `<span class="text-6xl">${currentStage.emoji}</span>`;
+  statusElement.innerHTML = `${currentStage.message}<br><span class="font-medium" id="growth-percentage">${Math.round(currentPlant.growth)}%</span> grown`;
+  
+  // Update watering buttons state
+  const waterButtons = document.querySelectorAll('#water-buttons button');
+  waterButtons.forEach(btn => {
+    const points = parseInt(btn.textContent.match(/\d+/)[0]);
+    btn.disabled = currentPlant.growth >= 100 || points > (window.gamePoints || 0);
+  });
+}
+
+// Water the plant using game points
+async function waterPlant(points) {
+  try {
+    const response = await fetch('/api/plants/water', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ points })
+    });
+    
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      currentPlant.growth = result.new_growth;
+      updatePlantDisplay();
+      updateGamePoints();
+      showMessage(`Used ${points} point${points > 1 ? 's' : ''} to water your plant!`);
+    } else {
+      showMessage(result.message || 'Failed to water plant', 'error');
+    }
+  } catch (error) {
+    console.error('Error watering plant:', error);
+    showMessage('Error watering plant. Please try again.', 'error');
+  }
+}
+
+// Show a message to the user
+function showMessage(message, type = 'success') {
+  const messageElement = document.getElementById('plant-message');
+  messageElement.textContent = message;
+  messageElement.className = 'mt-3 text-sm ' + (type === 'error' ? 'text-red-600' : 'text-green-600');
+  
+  // Clear message after 3 seconds
+  setTimeout(() => {
+    messageElement.textContent = '';
+  }, 3000);
+}
+
+// Fetch and update game points
+async function updateGamePoints() {
+  try {
+    const response = await fetch('/api/games/scores');
+    const scores = await response.json();
+    if (scores.length > 0) {
+      window.gamePoints = scores[0].score || 0;
+      document.getElementById('game-points').textContent = window.gamePoints;
+    }
+  } catch (error) {
+    console.error('Error fetching game points:', error);
+  }
+}
+
+// Initialize when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  // Load initial plant data
+  fetch('/api/plants/me')
+    .then(response => response.json())
+    .then(initPlant)
+    .catch(console.error);
+  
+  // Update game points
+  updateGamePoints();
+});
+</script>
 {% endblock %}

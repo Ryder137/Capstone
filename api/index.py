@@ -68,10 +68,17 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     
     # Initialize with dummy client to prevent immediate failure
     supabase = create_client("", "")
+    logger.error("Missing required Supabase environment variables")
 else:
-    # Initialize Supabase client
+    # Initialize Supabase client with proper configuration
     try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        # Configure the client with proper timeout and auth
+        if hasattr(supabase, 'postgrest'):
+            supabase.postgrest.auth(SUPABASE_KEY)
+            if hasattr(supabase.postgrest, 'session'):
+                supabase.postgrest.session.timeout = 30  # 30 seconds timeout
+        
         logger.info(f"Supabase client initialized with URL: {SUPABASE_URL}")
     except Exception as e:
         logger.error(f"Failed to initialize Supabase client: {str(e)}")
