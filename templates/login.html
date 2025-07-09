@@ -103,6 +103,45 @@ block content %}
         >
           <i class="bi bi-box-arrow-in-right mr-2"></i>Sign In
         </button>
+        
+        <div class="mt-4 text-center">
+          <a 
+            href="#" 
+            onclick="showForgotPassword()" 
+            class="text-blue-600 hover:text-blue-800 text-sm"
+          >
+            Forgot your password?
+          </a>
+        </div>
+        
+        <!-- Forgot Password Modal -->
+        <div id="forgotPasswordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-lg w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">Reset Password</h3>
+            <p class="mb-4">Enter your email address and we'll send you a link to reset your password.</p>
+            <input 
+              type="email" 
+              id="resetEmail" 
+              placeholder="Your email address" 
+              class="w-full p-3 border rounded-lg mb-4"
+              required
+            >
+            <div class="flex justify-end space-x-3">
+              <button 
+                onclick="hideForgotPassword()" 
+                class="px-4 py-2 border rounded-lg hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button 
+                onclick="sendPasswordReset()" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Send Reset Link
+              </button>
+            </div>
+          </div>
+        </div>
       </form>
 
       <div class="mt-8 text-center">
