@@ -1,0 +1,417 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard - UniCare Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Modern color scheme */
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-dark: #4338ca;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --dark: #1f2937;
+    --light: #f9fafb;
+    --gray: #6b7280;
+    --gray-light: #e5e7eb;
+  }
+  
+  /* Base styles */
+  body {
+    background-color: #f9fafb;
+  }
+  
+  /* Card styles */
+  .card {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .card-header {
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  /* Stat cards */
+  .stat-card {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .stat-icon {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+    color: white;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  /* Progress bars */
+  .progress-container {
+    width: 100%;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+    height: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    border-radius: 9999px;
+    transition: all 1s ease-in-out;
+  }
+  
+  /* Activity feed */
+  .activity-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* Responsive grid */
+  @media (min-width: 1024px) {
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .lg\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .lg\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .lg\:col-span-2 {
+      grid-column: span 2 / span 2;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="py-6 px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+      <p class="mt-1 text-sm text-gray-500">Welcome back, {{ current_user.email }}! Here's what's happening with your platform.</p>
+    </div>
+    <div class="flex space-x-3">
+      <button onclick="exportData('csv')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+        Export Data
+      </button>
+    </div>
+  </div>
+  
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Users -->
+    <div class="stat-card">
+      <div class="stat-icon bg-blue-100">
+        <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </div>
+      <div>
+        <div class="stat-value">{{ stats.total_users|default(0) }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    
+    <!-- Active Users -->
+    <div class="stat-card">
+      <div class="stat-icon bg-green-100">
+        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      </div>
+      <div>
+        <div class="stat-value">{{ stats.active_users|default(0) }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+    </div>
+    
+    <!-- New Users Today -->
+    <div class="stat-card">
+      <div class="stat-icon bg-purple-100">
+        <svg class="h-6 w-6 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <div class="stat-value">{{ stats.new_users_today|default(0) }}</div>
+        <div class="stat-label">New Today</div>
+      </div>
+    </div>
+    
+    <!-- Total Admins -->
+    <div class="stat-card">
+      <div class="stat-icon bg-yellow-100">
+        <svg class="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <div>
+        <div class="stat-value">{{ stats.total_admins|default(0) }}</div>
+        <div class="stat-label">Administrators</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Left Column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- User Growth Chart -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">User Growth</h2>
+        </div>
+        <div class="h-80">
+          <canvas id="userGrowthChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Recent Signups -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Signups</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for user in recent_signups %}
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.full_name|default('N/A') }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.created_at|datetimeformat('%b %d, %Y') }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No recent signups</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Activity</h2>
+        </div>
+        <div class="space-y-4">
+          {% for activity in activities %}
+          <div class="activity-item">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-900">{{ activity.title }}</p>
+                <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ activity.created_at|datetimeformat('%b %d, %Y %I:%M %p') }}</p>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-sm text-gray-500 text-center py-4">No recent activities</p>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="card">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900">{{ stats.total_journal_entries|default(0) }}</div>
+            <div class="text-sm text-gray-500">Journal Entries</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900">{{ stats.total_personality_tests|default(0) }}</div>
+            <div class="text-sm text-gray-500">Personality Tests</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // User Growth Chart
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('userGrowthChart').getContext('2d');
+    
+    // Sample data - replace with actual data from your backend
+    const userGrowthData = {
+      labels: [
+        {% for day in range(1, 31) %}
+          '{{ day }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      datasets: [{
+        label: 'New Users',
+        data: [
+          {% for day in range(1, 31) %}
+            {{ range(5, 15)|random }}{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ],
+        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+        borderColor: 'rgba(79, 70, 229, 1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true
+      }]
+    };
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: userGrowthData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              drawBorder: false
+            },
+            ticks: {
+              stepSize: 5
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  });
+  
+  // Export data function
+  function exportData(format) {
+    // This would be replaced with actual export functionality
+    alert(`Exporting data as ${format.toUpperCase()}...`);
+    // In a real implementation, you would make an API call to generate and download the export
+  }
+  
+  // Show success message if there's a success flash message
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        {% if category == 'success' %}
+          showToast('{{ message }}', 'success');
+        {% elif category == 'error' %}
+          showToast('{{ message }}', 'error');
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  
+  // Toast notification function
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-lg shadow-gray-200/50 border border-gray-100`;
+    
+    const icon = type === 'success' 
+      ? `<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">
+           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+           </svg>
+         </div>`
+      : `<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
+           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+           </svg>
+         </div>`;
+    
+    toast.innerHTML = `
+      ${icon}
+      <div class="ml-3 text-sm font-normal">${message}</div>
+      <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" data-dismiss-target="#toast-success" aria-label="Close">
+        <span class="sr-only">Close</span>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove toast after 5 seconds
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
+    
+    // Add click handler to close button
+    const closeButton = toast.querySelector('button');
+    closeButton.addEventListener('click', () => {
+      toast.remove();
+    });
+  }
+</script>
+{% endblock %}

@@ -162,12 +162,7 @@
             <i class="bi bi-clock-history text-blue-600 mr-2"></i>Recent Entries
           </h3>
           <div id="recent-entries-list" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-72 overflow-y-auto">
-            <!-- Example entry -->
-            <div class="bg-gray-50 rounded-lg border border-gray-200 aspect-square flex flex-col justify-center items-center p-4">
-              <div class="font-semibold text-center">Entry Title Example</div>
-              <div class="text-gray-600 text-sm mb-1 text-center">2025-07-06</div>
-              <div class="text-gray-700 text-center">This is a preview of the journal entry...</div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -227,175 +222,474 @@
 
   function saveJournalEntry() {
     const form = document.getElementById("journal-form");
+    if (!form) {
+      console.error("Journal form not found");
+      alert("Error: Could not find journal form. Please refresh the page and try again.");
+      return;
+    }
+    
     const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (!submitBtn) {
+      console.error("Submit button not found");
+      alert("Error: Could not find submit button. Please refresh the page and try again.");
+      return;
+    }
+    
+    const originalBtnText = submitBtn.innerHTML;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-    const entry = {
-      mood: formData.get("mood"),
-      anxietyLevel: formData.get("anxiety-level"),
-      stressLevel: formData.get("stress-level"),
-      title: formData.get("title"),
-      content: formData.get("content"),
-      helpfulActivities: formData.getAll("helpful-activities"),
-    };
-
-    if (!entry.mood || !entry.content.trim()) {
-      alert("Please select your mood and write something in your journal.");
+    // Get mood from selected radio button
+    const moodInput = document.querySelector('input[name="mood"]:checked');
+    if (!moodInput) {
+      alert("Please select how you're feeling today.");
       return;
     }
 
-    fetch("/save_journal", {
+    // Get helpful activities
+    const helpfulActivities = Array.from(
+      document.querySelectorAll('input[name="helpful-activities"]:checked')
+    ).map(el => el.value);
+
+    const entryData = {
+      title: formData.get("title") || "",
+      content: formData.get("content"),
+      mood: moodInput.value,
+      anxiety_level: parseInt(formData.get("anxiety-level") || "5"),
+      stress_level: parseInt(formData.get("stress-level") || "5"),
+      helpful_activities: helpfulActivities
+    };
+
+    if (!entryData.content || entryData.content.trim() === '') {
+      alert("Please write something in your journal entry.");
+      return;
+    }
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+    
+    // Add CSRF token to headers
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'  // Helps with CSRF protection
+    };
+    
+    // Always include CSRF token if available
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;  // Standard header name
+      headers['X-CSRFToken'] = csrfToken;   // Common alternative
+    }
+    
+    // Log the request payload for debugging
+    console.log('Sending journal entry:', entryData);
+    console.log('Request headers:', headers);
+    
+    fetch("/api/journal/entries", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(entry),
+      headers: headers,
+      body: JSON.stringify(entryData),
+      credentials: 'same-origin'  // Important for including cookies
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Show success message
-          showSuccessMessage();
-          // Reset form
-          form.reset();
-          document.getElementById("char-count").textContent = "0";
-          document.getElementById("anxiety-value").textContent = "5";
-          document.getElementById("stress-value").textContent = "5";
-          // Reset mood selection
-          document.querySelectorAll(".mood-option").forEach((opt) => {
-            opt.classList.remove("border-blue-500", "bg-blue-50");
-            opt.classList.add("border-gray-200");
-          });
-          // Reload recent entries
-          loadRecentEntries();
-          updateStats();
+    .then(async response => {
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      
+      if (!response.ok) {
+        try {
+          const errorData = JSON.parse(responseText);
+          console.error('Error response:', errorData);
+          throw errorData;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+          throw { error: responseText || 'Unknown error occurred' };
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert("An error occurred while saving your entry. Please try again.");
-      });
+      }
+      
+      try {
+        return JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse success response:', e);
+        throw { error: 'Invalid response from server' };
+      }
+    })
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        showSuccessMessage();
+        // Reset form
+        form.reset();
+        document.getElementById("char-count").textContent = "0";
+        document.getElementById("anxiety-value").textContent = "5";
+        document.getElementById("stress-value").textContent = "5";
+        // Reset mood selection
+        document.querySelectorAll(".mood-option").forEach(opt => {
+          opt.classList.remove("border-blue-500", "bg-blue-50");
+          opt.classList.add("border-gray-200");
+        });
+        // Reset checkboxes
+        document.querySelectorAll('input[name="helpful-activities"]:checked').forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        // Reload recent entries and stats
+        loadRecentEntries();
+        updateStats();
+      } else {
+        throw new Error(data.error || 'Failed to save entry');
+      }
+    })
+    .catch(error => {
+      console.error("Error saving journal entry:", error);
+      let errorMessage = "Failed to save journal entry. Please try again.";
+      
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Show error message in a more user-friendly way
+      const errorDiv = document.getElementById('form-errors');
+      if (errorDiv) {
+        errorDiv.innerHTML = `
+          <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-400"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-red-700">${errorMessage}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert(errorMessage);
+      }
+    })
+    .finally(() => {
+      // Reset button state with a small delay for better UX
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+      }, 500);
+    });
   }
 
   function loadRecentEntries() {
-    fetch("/get_journal_entries")
-      .then((response) => response.json())
-      .then((entries) => {
-        const recentEntriesDiv = document.getElementById("recent-entries");
-
-        if (entries.length === 0) {
-          recentEntriesDiv.innerHTML =
-            '<p class="text-sm text-gray-500 italic">No entries yet. Start writing to see your history!</p>';
+    let recentEntriesList;
+    
+    try {
+      recentEntriesList = document.getElementById("recent-entries-list");
+      
+      if (!recentEntriesList) {
+        console.error("Recent entries list container not found");
+        return;
+      }
+      
+      // Show loading state
+      recentEntriesList.innerHTML = '<div class="col-span-3 text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i><p class="mt-2 text-gray-500">Loading your entries...</p></div>';
+      
+      // Clear any existing error messages
+      const existingError = recentEntriesList.querySelector('.error-message');
+      if (existingError) {
+        recentEntriesList.removeChild(existingError);
+      }
+    } catch (error) {
+      console.error("Error setting up recent entries:", error);
+      return;
+    }
+    
+    fetch("/api/journal/entries?per_page=5")
+      .then(response => {
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error('Invalid response from server');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!recentEntriesList) {
+          console.error("Recent entries container not found");
+          return;
+        }
+        
+        if (!data || !data.entries) {
+          recentEntriesList.innerHTML = `
+            <div class="col-span-3 text-center py-8">
+              <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-red-700">No entries found. Start writing to see your entries here!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        if (data.entries.length === 0) {
+          recentEntriesList.innerHTML = `
+            <div class="col-span-3 text-center py-8">
+              <i class="bi bi-journal-text text-4xl mb-2 text-gray-400"></i>
+              <p class="text-gray-500">No journal entries yet. Start writing to see them here!</p>
+            </div>
+          `;
           return;
         }
 
-        const recentEntries = entries.slice(-5).reverse();
-        recentEntriesDiv.innerHTML = recentEntries
-          .map((entry) => {
-            const date = new Date(entry.timestamp).toLocaleDateString();
-            const moodEmoji = getMoodEmoji(entry.mood);
-            return `
-                <div class="p-3 bg-gray-50 rounded-lg border-l-4 border-blue-400">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs text-gray-500">${date}</span>
-                        <span class="text-lg">${moodEmoji}</span>
-                    </div>
-                    <p class="text-sm font-medium text-gray-800">${
-                      entry.title || "Untitled Entry"
-                    }</p>
-                    <p class="text-xs text-gray-600 mt-1">${entry.content.substring(
-                      0,
-                      60
-                    )}${entry.content.length > 60 ? "..." : ""}</p>
+        recentEntriesList.innerHTML = data.entries.map(entry => `
+          <div class="p-3 bg-gray-50 rounded-lg border-l-4 border-blue-400 mb-3 hover:bg-gray-100 transition-colors">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs text-gray-500">
+                ${new Date(entry.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </span>
+              <span class="text-lg">${getMoodEmoji(entry.mood)}</span>
+            </div>
+            <p class="text-sm font-medium text-gray-800">
+              ${entry.title || "Untitled Entry"}
+            </p>
+            <p class="text-xs text-gray-600 mt-1">
+              ${entry.content.substring(0, 60)}${entry.content.length > 60 ? '...' : ''}
+            </p>
+            ${entry.helpful_activities && entry.helpful_activities.length > 0 ? `
+              <div class="mt-2 flex flex-wrap gap-1">
+                ${entry.helpful_activities.map(activity => `
+                  <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                    ${activity}
+                  </span>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      })
+      .catch(error => {
+        console.error("Error loading journal entries:", error);
+        if (recentEntriesList) {
+          recentEntriesList.innerHTML = `
+            <div class="col-span-3 text-center py-8">
+              <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-red-700">Failed to load journal entries. Please try again later.</p>
+                    ${error.message ? `<p class="text-xs text-red-600 mt-1">${error.message}</p>` : ''}
+                  </div>
                 </div>
-            `;
-          })
-          .join("");
+              </div>
+            </div>
+          `;
+        }
       });
   }
 
   function updateStats() {
-    fetch("/get_journal_entries")
-      .then((response) => response.json())
-      .then((entries) => {
-        // Update weekly entries
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-        const weeklyEntries = entries.filter(
-          (entry) => new Date(entry.timestamp) > oneWeekAgo
-        ).length;
-
-        document.getElementById("weekly-entries").textContent = weeklyEntries;
-
-        // Calculate average mood
-        if (entries.length > 0) {
-          const moodValues = {
-            "very-sad": 1,
-            sad: 2,
-            neutral: 3,
-            happy: 4,
-            "very-happy": 5,
-          };
-          const avgMood =
-            entries.reduce(
-              (sum, entry) => sum + (moodValues[entry.mood] || 3),
-              0
-            ) / entries.length;
-          const avgMoodText =
-            Object.keys(moodValues).find(
-              (key) => moodValues[key] === Math.round(avgMood)
-            ) || "neutral";
-          document.getElementById("average-mood").textContent =
-            avgMoodText.replace("-", " ");
-        }
-
-        // Calculate streak
-        let streak = 0;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        for (let i = 0; i < 30; i++) {
-          const checkDate = new Date(today);
-          checkDate.setDate(checkDate.getDate() - i);
-
-          const hasEntry = entries.some((entry) => {
-            const entryDate = new Date(entry.timestamp);
-            entryDate.setHours(0, 0, 0, 0);
-            return entryDate.getTime() === checkDate.getTime();
-          });
-
-          if (hasEntry) {
-            streak++;
-          } else {
-            break;
+    let restoreTimeout;
+    let weeklyEntriesEl;
+    let longestStreakEl;
+    let originalWeeklyText;
+    let originalStreakText;
+    
+    try {
+      // Find all DOM elements we'll be updating
+      const elements = {
+        weeklyEntries: document.getElementById("weekly-entries"),
+        longestStreak: document.getElementById("longest-streak"),
+        totalEntries: document.getElementById("total-entries"),
+        streakDays: document.getElementById("streak-days"),
+        moodDistribution: document.getElementById("mood-distribution"),
+        moodTrend: document.getElementById("mood-trend"),
+        avgAnxiety: document.getElementById("avg-anxiety"),
+        avgStress: document.getElementById("avg-stress")
+      };
+      
+      // Check for required elements
+      if (!elements.weeklyEntries || !elements.longestStreak) {
+        console.error("Required stats display elements not found");
+        return;
+      }
+      
+      // Store original text for restoration if needed
+      originalWeeklyText = elements.weeklyEntries.textContent;
+      originalStreakText = elements.longestStreak.textContent;
+      
+      // Show loading state
+      elements.weeklyEntries.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      elements.longestStreak.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      
+      // Set a timeout to restore original text if the request fails
+      restoreTimeout = setTimeout(() => {
+        try {
+          if (elements.weeklyEntries && elements.weeklyEntries.textContent !== originalWeeklyText) {
+            elements.weeklyEntries.textContent = originalWeeklyText;
           }
+          if (elements.longestStreak && elements.longestStreak.textContent !== originalStreakText) {
+            elements.longestStreak.textContent = originalStreakText;
+          }
+        } catch (e) {
+          console.error("Error in restore timeout:", e);
         }
-
-        document.getElementById("streak-days").textContent = `${streak} days`;
+      }, 5000); // Restore after 5 seconds if no response
+    
+      fetch("/api/journal/stats")
+        .then(response => {
+          // Check if response is JSON
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error('Invalid response from server');
+          }
+          if (!response.ok) {
+            return response.json().then(err => {
+              throw new Error(err.error || 'Failed to load stats');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data || !data.success) {
+            throw new Error('Failed to load stats: Invalid data received');
+          }
+          
+          const stats = data.stats || {};
+          
+          // Update total entries if element exists
+          if (elements.totalEntries) {
+            elements.totalEntries.textContent = stats.total_entries || 0;
+          }
+          
+          // Update streak (if available and element exists)
+          if (elements.streakDays && stats.current_streak !== undefined) {
+            elements.streakDays.textContent = `${stats.current_streak} days`;
+          }
+        
+          // Update mood distribution if element exists
+          if (elements.moodDistribution) {
+            const moodEmojis = {
+              'very-sad': '😢',
+              'sad': '😔',
+              'neutral': '😐',
+              'happy': '🙂',
+              'very-happy': '😊'
+            };
+            
+            if (stats.mood_distribution && Object.keys(stats.mood_distribution).length > 0) {
+              elements.moodDistribution.innerHTML = Object.entries(stats.mood_distribution)
+                .map(([mood, count]) => `
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                      <span class="text-lg mr-2">${moodEmojis[mood] || '📝'}</span>
+                      <span class="text-sm font-medium text-gray-700 capitalize">
+                        ${mood.replace('-', ' ')}
+                      </span>
+                    </div>
+                    <span class="text-sm text-gray-500">${count} ${count === 1 ? 'entry' : 'entries'}</span>
+                  </div>
+                `)
+                .join('');
+            } else {
+              elements.moodDistribution.innerHTML = `
+                <div class="text-center py-4 text-gray-500">
+                  <i class="bi bi-emoji-neutral text-2xl"></i>
+                  <p class="mt-1">No mood data available</p>
+                </div>
+              `;
+            }
+          }
+          
+          // Update mood trend if element exists
+          if (elements.moodTrend && stats.avg_mood !== undefined) {
+            const moodScore = Math.round((stats.avg_mood || 0) * 100);
+            elements.moodTrend.innerHTML = `
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full ${moodScore >= 50 ? 'bg-green-500' : 'bg-yellow-500'}" 
+                     style="width: ${moodScore}%">
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                ${moodScore}% positive mood in the last 30 days
+              </p>
+            `;
+          }
+          
+          // Update anxiety level if element exists and data is available
+          if (elements.avgAnxiety && stats.avg_anxiety !== undefined) {
+            const anxietyLevel = Math.round(stats.avg_anxiety);
+            elements.avgAnxiety.textContent = `${anxietyLevel}/10`;
+            elements.avgAnxiety.className = `text-sm font-medium ${
+              anxietyLevel >= 7 ? 'text-red-600' : 
+              anxietyLevel >= 5 ? 'text-yellow-600' : 'text-green-600'
+            }`;
+          }
+          
+          // Update stress level if element exists and data is available
+          if (elements.avgStress && stats.avg_stress !== undefined) {
+            const stressLevel = Math.round(stats.avg_stress);
+            elements.avgStress.textContent = `${stressLevel}/10`;
+            elements.avgStress.className = `text-sm font-medium ${
+              stressLevel >= 7 ? 'text-red-600' : 
+              stressLevel >= 5 ? 'text-yellow-600' : 'text-green-600'
+            }`;
+          }
+      })
+      .catch(error => {
+        console.error("Error loading journal stats:", error);
+        // Don't show error to user, just log it
       });
+    } catch (error) {
+      console.error("Error in updateStats:", error);
+    } finally {
+      if (restoreTimeout) {
+        clearTimeout(restoreTimeout);
+      }
+    }
   }
 
   function getMoodEmoji(mood) {
     const moodEmojis = {
       "very-sad": "😢",
-      sad: "😕",
-      neutral: "😐",
-      happy: "😊",
-      "very-happy": "😄",
+      "sad": "😔",
+      "neutral": "😐",
+      "happy": "🙂",
+      "very-happy": "😊"
     };
-    return moodEmojis[mood] || "😐";
+    return moodEmojis[mood] || "📝";
   }
 
   function showSuccessMessage() {
     const successDiv = document.createElement("div");
-    successDiv.className =
-      "fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50";
-    successDiv.innerHTML =
-      '<i class="bi bi-check-circle mr-2"></i>Journal entry saved successfully!';
+    successDiv.className = "fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50 animate-fade-in-out";
+    successDiv.innerHTML = `
+      <i class="fas fa-check-circle"></i>
+      <span>Journal entry saved successfully!</span>
+    `;
     document.body.appendChild(successDiv);
-
+    
+    // Remove message after 3 seconds with fade out
     setTimeout(() => {
-      successDiv.remove();
+      successDiv.classList.add("opacity-0", "transition-opacity", "duration-500");
+      setTimeout(() => {
+        successDiv.remove();
+      }, 500);
     }, 3000);
   }
 </script>

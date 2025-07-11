@@ -1,5 +1,5 @@
 {% extends "base_new.html" %}
-{% block title %}Assessment History - UniCare{% endblock %}
+{% block title %}Personality Test History - UniCare{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -8,17 +8,17 @@
         <div class="md:flex md:items-center md:justify-between mb-8">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    Mental Health Assessment History
+                    Personality Test History
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">
-                    Review your past assessment results and track your progress over time.
+                    Review your past personality test results and track your progress over time.
                 </p>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4">
-                <a href="{{ url_for('assessment') }}" 
+                <a href="{{ url_for('personality_test') }}" 
                    class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <i class="bi bi-plus-circle mr-2"></i>
-                    New Assessment
+                    New Personality Test
                 </a>
             </div>
         </div>
@@ -114,11 +114,11 @@
             </div>
         </div>
 
-        <!-- Assessment History Table -->
+        <!-- Personality Test History Table -->
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Assessment History</h3>
-                <p class="mt-1 max-w-2xl text-sm text-gray-500">Your completed mental health assessments.</p>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Personality Test History</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Your completed personality tests.</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -135,35 +135,35 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        {% for assessment in assessments %}
+                        {% for test in personality_tests %}
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ assessment.formatted_date }}
+                                {{ test.formatted_date }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(assessment.category_scores.resilience) if assessment.category_scores and assessment.category_scores.resilience else 'N/A' }}</div>
-                                <div class="text-xs text-gray-500">{{ assessment.category_levels.resilience if assessment.category_levels and assessment.category_levels.resilience else '' }}</div>
+                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(test.category_scores.resilience) if test.category_scores and test.category_scores.resilience else 'N/A' }}</div>
+                                <div class="text-xs text-gray-500">{{ test.category_levels.resilience if test.category_levels and test.category_levels.resilience else '' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(assessment.category_scores.depression) if assessment.category_scores and assessment.category_scores.depression else 'N/A' }}</div>
-                                <div class="text-xs text-gray-500">{{ assessment.category_levels.depression if assessment.category_levels and assessment.category_levels.depression else '' }}</div>
+                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(test.category_scores.depression) if test.category_scores and test.category_scores.depression else 'N/A' }}</div>
+                                <div class="text-xs text-gray-500">{{ test.category_levels.depression if test.category_levels and test.category_levels.depression else '' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(assessment.category_scores.anxiety) if assessment.category_scores and assessment.category_scores.anxiety else 'N/A' }}</div>
-                                <div class="text-xs text-gray-500">{{ assessment.category_levels.anxiety if assessment.category_levels and assessment.category_levels.anxiety else '' }}</div>
+                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(test.category_scores.anxiety) if test.category_scores and test.category_scores.anxiety else 'N/A' }}</div>
+                                <div class="text-xs text-gray-500">{{ test.category_levels.anxiety if test.category_levels and test.category_levels.anxiety else '' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(assessment.category_scores.stress) if assessment.category_scores and assessment.category_scores.stress else 'N/A' }}</div>
-                                <div class="text-xs text-gray-500">{{ assessment.category_levels.stress if assessment.category_levels and assessment.category_levels.stress else '' }}</div>
+                                <div class="text-sm text-gray-900">{{ "%0.0f"|format(test.category_scores.stress) if test.category_scores and test.category_scores.stress else 'N/A' }}</div>
+                                <div class="text-xs text-gray-500">{{ test.category_levels.stress if test.category_levels and test.category_levels.stress else '' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-blue-600 hover:text-blue-900 view-details" data-assessment-id="{{ assessment.id }}">View Details</a>
+                                <a href="#" class="text-blue-600 hover:text-blue-900 view-details" data-test-id="{{ test.id }}">View Details</a>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No assessment history found. <a href="{{ url_for('assessment') }}" class="text-blue-600 hover:text-blue-800">Take your first assessment</a>.
+                                No test history found. <a href="{{ url_for('personality_test') }}" class="text-blue-600 hover:text-blue-800">Take your first test</a>.
                             </td>
                         </tr>
                         {% endfor %}
@@ -177,10 +177,10 @@
             <div class="px-4 py-5 sm:p-6">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Export Your Data</h3>
                 <div class="mt-2 max-w-xl text-sm text-gray-500">
-                    <p>Download your assessment history for your records or to share with a healthcare provider.</p>
+                    <p>Download your personality test history for your records or to share with a healthcare provider.</p>
                 </div>
                 <div class="mt-5">
-                    <a href="{{ url_for('export_assessments') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <a href="{{ url_for('export_personality_tests') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <i class="bi bi-download mr-2"></i>
                         Export as CSV
                     </a>
@@ -190,8 +190,8 @@
     </div>
 </div>
 
-<!-- Assessment Detail Modal -->
-<div id="assessment-modal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<!-- Personality Test Detail Modal -->
+<div id="test-detail-modal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -200,9 +200,9 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                            Assessment Details
+                            Test Details
                         </h3>
-                        <p class="mt-1 text-sm text-gray-500" id="assessment-date"></p>
+                        <p class="mt-1 text-sm text-gray-500" id="test-date"></p>
                     </div>
                     <button type="button" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none close-modal">
                         <span class="sr-only">Close</span>
@@ -310,19 +310,19 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Modal functionality
-    const modal = document.getElementById('assessment-modal');
+    const modal = document.getElementById('test-detail-modal');
     const openModalButtons = document.querySelectorAll('.view-details');
     const closeModalButtons = document.querySelectorAll('.close-modal');
     
-    // Open modal with assessment details
+    // Open modal with test details
     openModalButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            const assessmentId = this.getAttribute('data-assessment-id');
-            // In a real app, you would fetch the detailed assessment data here
+            const testId = this.getAttribute('data-test-id');
+            // In a real app, you would fetch the detailed test data here
             // For now, we'll use the data from the row
             const row = this.closest('tr');
-            const assessmentData = {
+            const testData = {
                 date: row.querySelector('td:first-child').textContent.trim(),
                 resilience: {
                     score: row.querySelector('td:nth-child(2) .text-sm').textContent.trim(),
@@ -348,33 +348,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 ]
             };
             
-            // Update modal with assessment data
-            document.getElementById('assessment-date').textContent = assessmentData.date;
+            // Update modal with test data
+            document.getElementById('test-date').textContent = testData.date;
             
             // Update resilience
-            document.getElementById('resilience-score').textContent = `${assessmentData.resilience.score}%`;
-            document.getElementById('resilience-level').textContent = assessmentData.resilience.level;
-            document.getElementById('resilience-bar').style.width = `${assessmentData.resilience.score}%`;
+            document.getElementById('resilience-score').textContent = `${personalityTestData.resilience.score}%`;
+            document.getElementById('resilience-level').textContent = personalityTestData.resilience.level;
+            document.getElementById('resilience-bar').style.width = `${personalityTestData.resilience.score}%`;
             
             // Update depression
-            document.getElementById('depression-score').textContent = `${assessmentData.depression.score}%`;
-            document.getElementById('depression-level').textContent = assessmentData.depression.level;
-            document.getElementById('depression-bar').style.width = `${assessmentData.depression.score}%`;
+            document.getElementById('depression-score').textContent = `${personalityTestData.depression.score}%`;
+            document.getElementById('depression-level').textContent = personalityTestData.depression.level;
+            document.getElementById('depression-bar').style.width = `${personalityTestData.depression.score}%`;
             
             // Update anxiety
-            document.getElementById('anxiety-score').textContent = `${assessmentData.anxiety.score}%`;
-            document.getElementById('anxiety-level').textContent = assessmentData.anxiety.level;
-            document.getElementById('anxiety-bar').style.width = `${assessmentData.anxiety.score}%`;
+            document.getElementById('anxiety-score').textContent = `${personalityTestData.anxiety.score}%`;
+            document.getElementById('anxiety-level').textContent = personalityTestData.anxiety.level;
+            document.getElementById('anxiety-bar').style.width = `${personalityTestData.anxiety.score}%`;
             
             // Update stress
-            document.getElementById('stress-score').textContent = `${assessmentData.stress.score}%`;
-            document.getElementById('stress-level').textContent = assessmentData.stress.level;
-            document.getElementById('stress-bar').style.width = `${assessmentData.stress.score}%`;
+            document.getElementById('stress-score').textContent = `${personalityTestData.stress.score}%`;
+            document.getElementById('stress-level').textContent = personalityTestData.stress.level;
+            document.getElementById('stress-bar').style.width = `${personalityTestData.stress.score}%`;
             
             // Update recommendations
             const recommendationsList = document.getElementById('recommendations-list');
             recommendationsList.innerHTML = '';
-            assessmentData.recommendations.forEach(rec => {
+            personalityTestData.recommendations.forEach(rec => {
                 const li = document.createElement('li');
                 li.textContent = rec;
                 recommendationsList.appendChild(li);

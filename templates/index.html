@@ -9,10 +9,10 @@
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a
-        href="{{ url_for('assessment') }}"
+        href="{{ url_for('personality_test') }}"
         class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
       >
-        Take Assessment
+        Take Personality Test
       </a>
       <a
         href="{{ url_for('chatbot') }}"
@@ -40,16 +40,16 @@
           <i class="bi bi-clipboard-check text-white text-xl"></i>
         </div>
         <h3 class="text-xl font-semibold mb-3 text-gray-800">
-          Mental Health Assessment
+          Personality Test
         </h3>
         <p class="text-gray-600 mb-4">
-          Take our scientifically-based assessment to understand your current
-          mental health status and get personalized recommendations.
+          Discover your personality traits and get personalized insights with our
+          scientifically-validated personality test.
         </p>
         <a
-          href="{{ url_for('assessment') }}"
+          href="{{ url_for('personality_test') }}"
           class="text-blue-600 font-semibold hover:text-blue-800 transition duration-300"
-          >Start Assessment →</a
+          >Start Test →</a
         >
       </div>
 
@@ -82,11 +82,11 @@
           <i class="bi bi-chat-heart text-white text-xl"></i>
         </div>
         <h3 class="text-xl font-semibold mb-3 text-gray-800">
-          AI Psychology Support
+          AI Support
         </h3>
         <p class="text-gray-600 mb-4">
-          Chat with our AI assistant trained in psychology principles. Get
-          immediate support and coping strategies 24/7.
+          Talk to our friendly AI assistant always here to listen, chat, 
+        and offer support anytime you need it, 24/7.
         </p>
         <a
           href="{{ url_for('chatbot') }}"
@@ -152,11 +152,17 @@
           Immediate help is available. Access emergency resources and connect
           with crisis support professionals when you need it most.
         </p>
-        <a
-          href="tel:988"
-          class="text-pink-600 font-semibold hover:text-pink-800 transition duration-300"
-          >Get Help Now →</a
-        >
+        <div class="space-y-3">
+          <a
+            class="block text-pink-600 font-semibold hover:text-pink-800 transition duration-300"
+            ><i class="bi bi-telephone-fill mr-2"></i>Call 911 Now →</a
+          >
+          <a
+            href="{{ url_for('chatbot') }}#crisis-support"
+            class="block text-pink-600 font-semibold hover:text-pink-800 transition duration-300"
+            ><i class="bi bi-chat-dots-fill mr-2"></i>View Crisis Resources →</a
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -170,55 +176,29 @@
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="text-3xl font-bold text-blue-600 mb-2">1 in 4</div>
+        <div class="text-3xl font-bold text-blue-600 mb-2">Affects how you feel </div>
         <p class="text-gray-600">
-          People experience mental health issues each year
+          Good mental health helps you handle stress and emotions.
         </p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="text-3xl font-bold text-green-600 mb-2">75%</div>
+        <div class="text-3xl font-bold text-green-600 mb-2">Supports relationships</div>
         <p class="text-gray-600">
-          Improvement rate with proper mental health care
+          It helps you connect and communicate with others.
         </p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="text-3xl font-bold text-purple-600 mb-2">24/7</div>
-        <p class="text-gray-600">Support available through our platform</p>
+        <div class="text-3xl font-bold text-purple-600 mb-2">Impacts choices</div>
+        <p class="text-gray-600">Mental well-being helps you make healthy decisions.</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="text-3xl font-bold text-orange-600 mb-2">100K+</div>
-        <p class="text-gray-600">People helped improve their mental wellness</p>
+        <div class="text-3xl font-bold text-orange-600 mb-2">Boosts daily life</div>
+        <p class="text-gray-600">It gives you energy, focus, and motivation to do things.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Call to Action -->
-<section class="py-16 bg-gradient-to-r from-green-500 to-blue-500 text-white">
-  <div class="max-w-7xl mx-auto px-4 text-center">
-    <h2 class="text-4xl font-bold mb-6">
-      Start Your Mental Health Journey Today
-    </h2>
-    <p class="text-xl mb-8 max-w-2xl mx-auto">
-      Take the first step towards better mental health. Our comprehensive tools
-      and resources are here to support you every step of the way.
-    </p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a
-        href="{{ url_for('assessment') }}"
-        class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
-      >
-        <i class="bi bi-clipboard-check mr-2"></i>Take Free Assessment
-      </a>
-      <a
-        href="{{ url_for('chatbot') }}"
-        class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300"
-      >
-        <i class="bi bi-chat-heart mr-2"></i>Chat with AI Support
-      </a>
-    </div>
-  </div>
-</section>
 
 <!-- Emergency Notice -->
 <section class="bg-red-600 text-white py-4">

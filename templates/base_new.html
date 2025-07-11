@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>
       {% block title %}UniCare - Mental Health Support{% endblock %}
     </title>
@@ -51,9 +52,9 @@
                 >Home</a
               >
               <a
-                href="{{ url_for('assessment') }}"
-                class="nav-link {% if active_page == 'assessment' %}active{% endif %}"
-                >Assessment</a
+                href="{{ url_for('personality_test') }}"
+                class="nav-link {% if active_page == 'personality_test' %}active{% endif %}"
+                >Personality Test</a
               >
               <a
                 href="{{ url_for('journal') }}"
@@ -124,9 +125,9 @@
           </li>
           <li>
             <a
-              href="{{ url_for('assessment') }}"
+              href="{{ url_for('personality_test') }}"
               class="block text-sm px-2 py-4 hover:bg-blue-500 transition duration-300"
-              >Assessment</a
+              >Personality Test</a
             >
           </li>
           <li>
@@ -193,7 +194,21 @@
     </nav>
 
     <main class="min-h-screen">
- {% block content %}{% endblock %}
+      {% if session.user %}
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold">Hello, {{ session.user.name }}! 👋</h2>
+            <p class="text-blue-100 text-sm mt-1">Welcome back to your mental health journey</p>
+          </div>
+          <a href="{{ url_for('dashboard') }}" class="bg-white text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            View Dashboard
+          </a>
+        </div>
+      </div>
+      {% endif %}
+      
+      {% block content %}{% endblock %}
     </main>
 
     <footer class="bg-gray-800 text-white py-8">
@@ -211,9 +226,9 @@
             <ul class="space-y-2">
               <li>
                 <a
-                  href="{{ url_for('assessment') }}"
-                  class="text-gray-400 hover:text-white"
-                  >Mental Health Assessment</a
+                  href="{{ url_for('personality_test') }}"
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >Personality Test</a
                 >
               </li>
               <li>
@@ -246,7 +261,7 @@
                 <a
                   href="{{ url_for('chatbot') }}"
                   class="text-gray-400 hover:text-white"
-                  >AI Chat Support</a
+                  >AI Chat</a
                 >
               </li>
               <li>
@@ -267,13 +282,13 @@
           <div>
             <h4 class="text-md font-semibold mb-4">Contact</h4>
             <p class="text-gray-400">24/7 Mental Health Support</p>
-            <p class="text-gray-400">Emergency: 988</p>
+            <p class="text-gray-400">Emergency: 911</p>
             <p class="text-gray-400">support@unicare.com</p>
           </div>
         </div>
         <div class="mt-8 pt-8 border-t border-gray-700 text-center">
           <p class="text-gray-400">
-            &copy; 2024 UniCare. All rights reserved. Mental health matters.
+            &copy; 2025 UniCare. All rights reserved. Mental health matters.
           </p>
         </div>
       </div>

@@ -1,14 +1,14 @@
-{% extends "base_new.html" %} {% block title %}AI Psychology Support - UniCare{%
+{% extends "base_new.html" %} {% block title %}AI - UniCare{%
 endblock %} {% block content %}
 <section class="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
   <div class="max-w-6xl mx-auto px-4">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-gray-800 mb-4">
-        AI Psychology Support
+        AI Support
       </h1>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Talk to our AI assistant trained in psychology principles. Get immediate
-        support, coping strategies, and guidance 24/7.
+        Talk to our friendly AI assistant—always here to listen, chat, 
+        and offer support anytime you need it, 24/7.
       </p>
       <div
         class="mt-4 p-4 bg-blue-100 rounded-lg border-l-4 border-blue-500 max-w-2xl mx-auto"
@@ -35,10 +35,10 @@ endblock %} {% block content %}
             </div>
             <div>
               <h3 class="text-lg font-semibold text-gray-800">
-                Dr. AI Assistant
+                UNI Support
               </h3>
               <p class="text-sm text-gray-600">
-                Psychology Support • Always Available
+                 Always Available
               </p>
             </div>
             <div class="ml-auto flex items-center">
@@ -170,7 +170,7 @@ endblock %} {% block content %}
   </div>
 </section>
 <!-- Crisis Support (Philippines) - Before Footer -->
-<div class="mt-10">
+<div id="crisis-support" class="mt-10">
   <div class="bg-red-50 border border-red-200 rounded-xl p-6">
     <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center"><i class="bi bi-exclamation-triangle text-red-600 mr-2"></i>Crisis Support</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm w-full">
@@ -313,21 +313,33 @@ endblock %} {% block content %}
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.content || ''
       },
       body: JSON.stringify({ message: message }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then(err => { throw err; });
+        }
+        return response.json();
+      })
       .then((data) => {
         hideTypingIndicator();
-        addMessageToChat(data.response, "ai");
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        addMessageToChat(data.response || "I'm not sure how to respond to that. Could you try rephrasing?", "ai");
       })
       .catch((error) => {
         hideTypingIndicator();
-        console.error("Error:", error);
-        addMessageToChat(
-          "I apologize, but I seem to be having trouble connecting right now. Please try again in a moment.",
-          "ai"
-        );
+        console.error("Chat Error:", error);
+        let errorMessage = "I apologize, but I'm having trouble processing your request. ";
+        if (error.message) {
+          errorMessage += error.message;
+        } else {
+          errorMessage += "Please try again in a moment.";
+        }
+        addMessageToChat(errorMessage, "ai");
       });
   }
 

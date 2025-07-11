@@ -1,368 +1,523 @@
-{% extends "base_new.html" %} {% block title %}Dashboard - UniCare{% endblock %} {%
-block content %}
-<section class="py-8 bg-gray-50 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4">
+{% extends "base_new.html" %}
+
+{% block title %}Dashboard - UniCare{% endblock %}
+
+{% block content %}
+<div class="py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Dashboard Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">
-        Welcome back, {{ session.user.name }}!
-      </h1>
-      <p class="text-gray-600">Here's your mental health journey overview</p>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            Welcome back, {{ session.user.name.split(' ')[0] }}! 👋
+          </h1>
+          <p class="text-gray-600">Here's your mental health journey at a glance</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <i class="bi bi-stars text-yellow-500 mr-2"></i>
+            <span class="font-medium text-gray-700">{{ user_points or 0 }} points</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{{ url_for('personality_test') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <i class="bi bi-clipboard-plus mr-2"></i> Take a Test
+        </a>
+        <a href="{{ url_for('journal') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="bi bi-journal-text mr-2"></i> New Journal Entry
+        </a>
+        <a href="{{ url_for('breathing') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="bi bi-wind mr-2"></i> Breathing Exercise
+        </a>
+      </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div
-            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
-          >
-            <i class="bi bi-clipboard-data text-blue-600 text-xl"></i>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Personality Tests Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Personality Tests</h3>
+              <p class="text-2xl font-bold text-gray-800 mt-1">
+                {{ personality_tests|length }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+              <i class="bi bi-clipboard-data text-blue-600 text-xl"></i>
+            </div>
           </div>
-          <div class="ml-4">
-            <h3 class="text-sm font-medium text-gray-500">Assessments</h3>
-            <p class="text-2xl font-bold text-gray-800">
-              {{ assessments|length }}
-            </p>
+          <div class="mt-6">
+          <div class="bg-white/50 p-4 rounded-lg border border-blue-50 mb-4">
+            <p class="text-gray-700 leading-relaxed">{{ latest_summary.summary }}</p>
+          </div>
+          <div class="flex justify-between items-center">
+            <a href="{{ url_for('personality_test_result', test_id=latest_summary.id) }}" class="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center group">
+              View detailed report
+              <i class="bi bi-arrow-right ml-1 transition-transform group-hover:translate-x-1"></i>
+            </a>
+            <a href="{{ url_for('personality_test') }}" class="text-sm text-gray-600 hover:text-gray-800 flex items-center">
+              <i class="bi bi-arrow-repeat mr-1"></i> Retake test
+            </a>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Journal Entries Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Journal Entries</h3>
+              <p class="text-2xl font-bold text-gray-800 mt-1">
+                {{ journal_entries|length }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+              <i class="bi bi-journal-text text-green-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4">
+            <a href="{{ url_for('journal') }}" class="text-sm font-medium text-green-600 hover:text-green-800 flex items-center">
+              Write new entry <i class="bi bi-pencil-square ml-1"></i>
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div
-            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
-          >
-            <i class="bi bi-journal-text text-green-600 text-xl"></i>
+      <!-- Breathing Sessions Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Breathing Sessions</h3>
+              <p class="text-2xl font-bold text-gray-800 mt-1">
+                {% set total_sessions = breathing_stats|map(attribute='total_sessions')|sum %}
+                {{ total_sessions or 0 }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">{{ (breathing_stats|map(attribute='total_duration')|sum / 60)|round(1) }} min total</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+              <i class="bi bi-wind text-purple-600 text-xl"></i>
+            </div>
           </div>
-          <div class="ml-4">
-            <h3 class="text-sm font-medium text-gray-500">Journal Entries</h3>
-            <p class="text-2xl font-bold text-gray-800">
-              {{ journal_entries|length }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div
-            class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
-          >
-            <i class="bi bi-wind text-purple-600 text-xl"></i>
-          </div>
-          <div class="ml-4">
-            <h3 class="text-sm font-medium text-gray-500">
-              Breathing Sessions
-            </h3>
-            <p class="text-2xl font-bold text-gray-800">
-              {% set total_sessions =
-              breathing_stats|map(attribute='total_sessions')|sum %} {{
-              total_sessions or 0 }}
-            </p>
+          <div class="mt-4">
+            <a href="{{ url_for('breathing') }}" class="text-sm font-medium text-purple-600 hover:text-purple-800 flex items-center">
+              Start session <i class="bi bi-play-circle ml-1"></i>
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div
-            class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
-          >
-            <i class="bi bi-controller text-orange-600 text-xl"></i>
+      <!-- Games Played Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Games Played</h3>
+              <p class="text-2xl font-bold text-gray-800 mt-1">
+                {{ game_scores|length }}
+              </p>
+              {% if game_scores %}
+              <p class="text-xs text-gray-500 mt-1">High score: {{ game_scores|map(attribute='score')|max|default(0) }}</p>
+              {% endif %}
+            </div>
+            <div class="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
+              <i class="bi bi-joystick text-orange-600 text-xl"></i>
+            </div>
           </div>
-          <div class="ml-4">
-            <h3 class="text-sm font-medium text-gray-500">Games Played</h3>
-            <p class="text-2xl font-bold text-gray-800">
-              {{ game_scores|length }}
-            </p>
+          <div class="mt-4">
+            <a href="{{ url_for('games') }}" class="text-sm font-medium text-orange-600 hover:text-orange-800 flex items-center">
+              Play now <i class="bi bi-joystick ml-1"></i>
+            </a>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Published Content Section -->
+    {% if published_content %}
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Latest Updates</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for item in published_content %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+          <div class="p-6">
+            <div class="flex items-center mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                {{ item.content_type|title }}
+              </span>
+              <span class="ml-2 text-sm text-gray-500">
+                {{ item.published_at|datetimeformat('%b %d, %Y') }}
+              </span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ item.title }}</h3>
+            {% if item.excerpt %}
+            <p class="text-gray-600 mb-4">{{ item.excerpt }}</p>
+            {% endif %}
+            <div class="flex justify-between items-center">
+              <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Read more</a>
+              {% if item.author_id %}
+              <span class="text-sm text-gray-500">By {{ item.author_id|truncate(15, True) }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Latest Assessment Summary -->
+      <!-- Personality Test Summary -->
       {% if latest_summary %}
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-md p-6 mb-8 border border-blue-100">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-gray-800">Your Latest Assessment</h2>
-          <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if latest_summary.overall_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.overall_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
-            {{ latest_summary.overall_level }}
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm p-6 border border-blue-100 transition-all hover:shadow-md">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-1">Your Personality Profile</h2>
+            <p class="text-sm text-gray-500">Based on your latest test results</p>
+          </div>
+          <span class="text-xs font-medium px-3 py-1 bg-white/80 text-blue-700 rounded-full border border-blue-200 backdrop-blur-sm">
+            {{ latest_summary.created_at|datetimeformat('%b %d, %Y') }}
           </span>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div class="bg-white p-4 rounded-lg shadow-sm">
-            <p class="text-sm text-gray-500">Resilience</p>
-            <div class="flex items-center mt-1">
-              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.resilience_score) }}</span>
-              <span class="ml-1 text-xs text-gray-500">/100</span>
-            </div>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.resilience_level in ['High', 'Very High'] else 'bg-yellow-100 text-yellow-800' if latest_summary.resilience_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+        
+        <!-- Score Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <!-- Resilience -->
+          <div class="bg-white p-4 rounded-xl border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Resilience</span>
+              <span class="text-xs px-2 py-1 rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.resilience_level in ['High', 'Very High'] else 'bg-yellow-100 text-yellow-800' if latest_summary.resilience_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
                 {{ latest_summary.resilience_level }}
               </span>
             </div>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
-            <p class="text-sm text-gray-500">Depression</p>
-            <div class="flex items-center mt-1">
-              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.depression_score) }}</span>
-              <span class="ml-1 text-xs text-gray-500">/27</span>
+            <div class="text-2xl font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.resilience_score) }}<span class="text-sm font-normal text-gray-500">/100</span></div>
+            <div class="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full progress-bar-animate progress-bar-resilience {{ 'bg-green-500' if latest_summary.resilience_level in ['High', 'Very High'] else 'bg-yellow-500' if latest_summary.resilience_level == 'Moderate' else 'bg-red-500' }}"
+                   style="--resilience-width: {{ latest_summary.resilience_score }}%"
+                   data-width="{{ latest_summary.resilience_score }}">
+              </div>
             </div>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.depression_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.depression_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+          </div>
+          
+          <!-- Depression -->
+          <div class="bg-white p-4 rounded-xl border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Depression</span>
+              <span class="text-xs px-2 py-1 rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.depression_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.depression_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
                 {{ latest_summary.depression_level }}
               </span>
             </div>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
-            <p class="text-sm text-gray-500">Anxiety</p>
-            <div class="flex items-center mt-1">
-              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.anxiety_score) }}</span>
-              <span class="ml-1 text-xs text-gray-500">/21</span>
+            <div class="text-2xl font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.depression_score) }}<span class="text-sm font-normal text-gray-500">/27</span></div>
+            <div class="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full progress-bar-animate progress-bar-depression {{ 'bg-green-500' if latest_summary.depression_level in ['Minimal', 'Mild'] else 'bg-yellow-500' if latest_summary.depression_level == 'Moderate' else 'bg-red-500' }}"
+                   style="--depression-width: {{ (latest_summary.depression_score / 27) * 100 }}%"
+                   data-width="{{ (latest_summary.depression_score / 27) * 100 }}">
+              </div>
             </div>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.anxiety_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.anxiety_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+          </div>
+          
+          <!-- Anxiety -->
+          <div class="bg-white p-4 rounded-xl border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Anxiety</span>
+              <span class="text-xs px-2 py-1 rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.anxiety_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.anxiety_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
                 {{ latest_summary.anxiety_level }}
               </span>
             </div>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
-            <p class="text-sm text-gray-500">Stress</p>
-            <div class="flex items-center mt-1">
-              <span class="text-lg font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.stress_score) }}</span>
-              <span class="ml-1 text-xs text-gray-500">/21</span>
+            <div class="text-2xl font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.anxiety_score) }}<span class="text-sm font-normal text-gray-500">/21</span></div>
+            <div class="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full progress-bar-animate progress-bar-anxiety {{ 'bg-green-500' if latest_summary.anxiety_level in ['Minimal', 'Mild'] else 'bg-yellow-500' if latest_summary.anxiety_level == 'Moderate' else 'bg-red-500' }}"
+                   style="--anxiety-width: {{ (latest_summary.anxiety_score / 21) * 100 }}%"
+                   data-width="{{ (latest_summary.anxiety_score / 21) * 100 }}">
+              </div>
             </div>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-0.5 text-xs rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.stress_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.stress_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
+          </div>
+          
+          <!-- Stress -->
+          <div class="bg-white p-4 rounded-xl border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Stress</span>
+              <span class="text-xs px-2 py-1 rounded-full {{ 'bg-green-100 text-green-800' if latest_summary.stress_level in ['Minimal', 'Mild'] else 'bg-yellow-100 text-yellow-800' if latest_summary.stress_level == 'Moderate' else 'bg-red-100 text-red-800' }}">
                 {{ latest_summary.stress_level }}
               </span>
             </div>
+            <div class="text-2xl font-bold text-blue-600">{{ "%0.0f"|format(latest_summary.stress_score) }}<span class="text-sm font-normal text-gray-500">/21</span></div>
+            <div class="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full progress-bar-animate progress-bar-stress {{ 'bg-green-500' if latest_summary.stress_level in ['Minimal', 'Mild'] else 'bg-yellow-500' if latest_summary.stress_level == 'Moderate' else 'bg-red-500' }}"
+                   style="--stress-width: {{ (latest_summary.stress_score / 21) * 100 }}%"
+                   data-width="{{ (latest_summary.stress_score / 21) * 100 }}">
+              </div>
+            </div>
           </div>
         </div>
-        <div class="flex justify-between items-center">
-          <p class="text-sm text-gray-600">
-            Last updated: {{ latest_summary.created_at.strftime('%B %d, %Y') }}
-          </p>
-          <a href="{{ url_for('assessment_history') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
-            View full history →
+        
+        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+          <p class="text-sm text-gray-500">Last updated {{ latest_summary.created_at|datetimeformat('%b %d, %Y') }}</p>
+          <a href="{{ url_for('personality_test_result', test_id=latest_summary.id) }}" 
+             class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center group">
+            View full report
+            <i class="bi bi-arrow-right ml-1 transition-transform group-hover:translate-x-0.5"></i>
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm p-8 border-2 border-dashed border-blue-100 text-center">
+        <div class="max-w-xs mx-auto">
+          <div class="h-16 w-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-clipboard-pulse text-blue-600 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-800 mb-2">No test results yet</h3>
+          <p class="text-gray-500 text-sm mb-5">Take a personality test to discover your mental health profile and get personalized insights.</p>
+          <a href="{{ url_for('personality_test') }}" 
+             class="inline-flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            <i class="bi bi-clipboard-plus mr-2"></i> Take the Test
           </a>
         </div>
       </div>
       {% endif %}
-
-      <!-- Recent Assessments -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Recent Assessments
-        </h2>
-        {% if assessments %}
-        <div class="space-y-4">
-          {% for assessment in assessments[:3] %}
-          {% set border_color = 'border-green-500' if assessment.level == 'Minimal' else 'border-yellow-500' if assessment.level == 'Mild' else 'border-orange-500' if assessment.level == 'Moderate' else 'border-red-500' %}
-          <div class="border-l-4 {{ border_color }} pl-4 py-2">
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="font-medium text-gray-800">
-                  {{ assessment.level }} Level
-                </p>
-                <p class="text-sm text-gray-600">
-                  Score: {{ assessment.total_score }}/15
-                </p>
-              </div>
-              <span class="text-sm text-gray-500"
-                >{{ assessment.created_at[:10] }}</span
-              >
-            </div>
-          </div>
-          {% endfor %}
+      
+      <!-- Recent Tests -->
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+            <i class="bi bi-clipboard-data text-blue-600 mr-2"></i>
+            Recent Tests
+          </h2>
+          <a href="{{ url_for('personality_test_history') }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+            View all
+            <i class="bi bi-chevron-right ml-1"></i>
+          </a>
         </div>
-        <div class="mt-4">
-            <a href="{{ url_for('assessment') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Take New Assessment →
-            </a>
-        </div>
-        {% else %}
-        <div class="text-center py-8">
-          <i class="bi bi-clipboard-data text-gray-300 text-4xl mb-4"></i>
-          <p class="text-gray-500 mb-4">No assessments taken yet</p>
-          <a
-            href="{{ url_for('assessment') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
-            >Take Your First Assessment</a
-          >
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Journal Stats -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Journal Insights
-        </h2>
-        {% if journal_stats %}
-        <div class="space-y-4">
-          <div>
-            <h3 class="text-sm font-medium text-gray-600 mb-2">
-              Most Common Mood
-            </h3>
-            {% set top_mood = journal_stats[0] %}
-            <div class="flex items-center">
-              <span class="text-2xl mr-2">
-                {% if top_mood.mood == 'happy' %}😊 {% elif top_mood.mood ==
-                'sad' %}😢 {% elif top_mood.mood == 'anxious' %}😰 {% elif
-                top_mood.mood == 'calm' %}😌 {% elif top_mood.mood == 'angry'
-                %}😠 {% else %}😐{% endif %}
-              </span>
-              <span class="font-semibold capitalize">{{ top_mood.mood }}</span>
-              <span class="text-sm text-gray-500 ml-2"
-                >({{ top_mood.mood_count }} times)</span
-              >
-            </div>
-          </div>
-
-          {% if journal_stats[0].avg_anxiety %}
-          <div>
-            <h3 class="text-sm font-medium text-gray-600 mb-2">
-              Average Anxiety Level
-            </h3>
-            <div class="flex items-center">
-              <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
-                <div
-                  class="bg-red-500 h-2 rounded-full"
-                  style="width: {{ ((journal_stats[0].avg_anxiety / 10) * 100)|int }}%"
-                ></div>
-              </div>
-              <span class="text-sm font-medium"
-                >{{ "%.1f"|format(journal_stats[0].avg_anxiety) }}/10</span
-              >
-            </div>
-          </div>
-          {% endif %} {% if journal_stats[0].avg_stress %}
-          <div>
-            <h3 class="text-sm font-medium text-gray-600 mb-2">
-              Average Stress Level
-            </h3>
-            <div class="flex items-center">
-              <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
-                <div
-                  class="bg-orange-500 h-2 rounded-full"
-                  style="width: {{ ((journal_stats[0].avg_stress / 10) * 100)|int }}%"
-                ></div>
-              </div>
-              <span class="text-sm font-medium"
-                >{{ "%.1f"|format(journal_stats[0].avg_stress) }}/10</span
-              >
-            </div>
-          </div>
-          {% endif %}
-        </div>
-        <div class="mt-4">
-          <a
-            href="{{ url_for('journal') }}"
-            class="text-green-600 hover:text-green-800 text-sm font-medium"
-            >Add New Entry →</a
-          >
-        </div>
-        {% else %}
-        <div class="text-center py-8">
-          <i class="bi bi-journal-text text-gray-300 text-4xl mb-4"></i>
-          <p class="text-gray-500 mb-4">Start journaling to see insights</p>
-          <a
-            href="{{ url_for('journal') }}"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300"
-            >Start Journaling</a
-          >
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Breathing Stats -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Breathing Practice
-        </h2>
-        {% if breathing_stats %}
-        <div class="space-y-4">
-          {% for stat in breathing_stats %}
-          <div
-            class="flex justify-between items-center py-2 border-b border-gray-100"
-          >
-            <div>
-              <p class="font-medium text-gray-800 capitalize">
-                {{ stat.technique }}
-              </p>
-              <p class="text-sm text-gray-600">
-                {{ stat.technique_count }} sessions
-              </p>
-            </div>
-            <div class="text-right">
-              <p class="font-medium text-gray-800">
-                {{ (stat.total_duration / 60)|round|int }} min
-              </p>
-              <p class="text-sm text-gray-600">total</p>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-        <div class="mt-4">
-          <a
-            href="{{ url_for('breathing') }}"
-            class="text-purple-600 hover:text-purple-800 text-sm font-medium"
-            >Practice Breathing →</a
-          >
-        </div>
-        {% else %}
-        <div class="text-center py-8">
-          <i class="bi bi-wind text-gray-300 text-4xl mb-4"></i>
-          <p class="text-gray-500 mb-4">No breathing sessions yet</p>
-          <a
-            href="{{ url_for('breathing') }}"
-            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300"
-            >Start Practicing</a
-          >
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Recent Game Scores -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Recent Game Activity
-        </h2>
-        {% if game_scores %}
+        
+        {% if personality_tests %}
         <div class="space-y-3">
-          {% for score in game_scores[:5] %}
-          <div class="flex justify-between items-center py-2">
-            <div>
-              <p class="font-medium text-gray-800 capitalize">
-                {{ score.game_type.replace('_', ' ') }}
-              </p>
-              <p class="text-sm text-gray-600">{{ score.created_at[:10] }}</p>
+          {% for test in personality_tests[:3] %}
+          <a href="{{ url_for('personality_test_result', test_id=test.id) }}" 
+             class="group block p-4 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-colors">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-medium text-gray-800 group-hover:text-blue-700">
+                  {{ test.test_type|replace('_', ' ')|title }}
+                </h3>
+                <div class="flex items-center mt-1 space-x-2">
+                  <span class="text-sm text-gray-500">
+                    {{ test.created_at|datetimeformat('%b %d, %Y') }}
+                  </span>
+                  {% if test.personality_type %}
+                  <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
+                    {{ test.personality_type }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                <i class="bi bi-chevron-right"></i>
+              </div>
             </div>
-            <div class="text-right">
-              <p class="font-bold text-lg text-blue-600">{{ score.score }}</p>
-              <p class="text-sm text-gray-600">Level {{ score.level }}</p>
-            </div>
-          </div>
+          </a>
           {% endfor %}
         </div>
-        <div class="mt-4">
-          <a
-            href="{{ url_for('games') }}"
-            class="text-orange-600 hover:text-orange-800 text-sm font-medium"
-            >Play Games →</a
-          >
+        {% else %}
+        <div class="text-center py-8 px-4">
+          <div class="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+            <i class="bi bi-clipboard-pulse text-blue-500 text-2xl"></i>
+          </div>
+          <h3 class="text-gray-700 font-medium mb-1">No tests completed yet</h3>
+          <p class="text-gray-500 text-sm mb-4">Take a personality test to discover your traits</p>
+          <a href="{{ url_for('personality_test') }}" 
+             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            <i class="bi bi-plus-lg mr-2"></i> Start Test
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      <!-- Journal Insights -->
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+            <i class="bi bi-journal-text text-green-600 mr-2"></i>
+            Journal Insights
+          </h2>
+          <a href="{{ url_for('journal') }}" class="text-sm text-green-600 hover:text-green-800 flex items-center">
+            New Entry
+            <i class="bi bi-plus-circle ml-1"></i>
+          </a>
+        </div>
+        
+        {% if journal_stats %}
+        <div class="space-y-6">
+          <!-- Mood Summary -->
+          <div class="bg-green-50/50 p-4 rounded-xl border border-green-100">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Your Mood This Week</h3>
+            <div class="flex items-center">
+              <span class="text-3xl mr-3">
+                {% set top_mood = journal_stats[0] %}
+                {% if top_mood.mood == 'happy' %}😊
+                {% elif top_mood.mood == 'sad' %}😢
+                {% elif top_mood.mood == 'anxious' %}😰
+                {% elif top_mood.mood == 'calm' %}😌
+                {% elif top_mood.mood == 'angry' %}😠
+                {% else %}😐{% endif %}
+              </span>
+              <div>
+                <p class="font-medium text-gray-800 capitalize">{{ top_mood.mood or 'Neutral' }}</p>
+                <p class="text-sm text-gray-500">Most common mood ({{ top_mood.mood_count }} entries)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            {% if journal_stats[0].avg_anxiety %}
+            <div class="bg-white p-3 rounded-xl border border-gray-100">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-500">Anxiety</span>
+                <span class="text-xs font-medium {{ 'text-green-600' if journal_stats[0].avg_anxiety <= 3 else 'text-yellow-600' if journal_stats[0].avg_anxiety <= 7 else 'text-red-600' }}">
+                  {{ "%.1f"|format(journal_stats[0].avg_anxiety) }}/10
+                </span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div class="h-full rounded-full progress-bar-animate progress-bar-journal-anxiety {{ 'bg-green-500' if journal_stats[0].avg_anxiety <= 3 else 'bg-yellow-500' if journal_stats[0].avg_anxiety <= 7 else 'bg-red-500' }}"
+                     style="--journal-anxiety-width: {{ journal_stats[0].anxiety_width }}%"
+                     data-width="{{ journal_stats[0].anxiety_width }}">
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if journal_stats[0].avg_stress %}
+            <div class="bg-white p-3 rounded-xl border border-gray-100">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-500">Stress</span>
+                <span class="text-xs font-medium {{ 'text-green-600' if journal_stats[0].avg_stress <= 3 else 'text-yellow-600' if journal_stats[0].avg_stress <= 7 else 'text-red-600' }}">
+                  {{ "%.1f"|format(journal_stats[0].avg_stress) }}/10
+                </span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div class="h-full rounded-full progress-bar-animate progress-bar-journal-stress {{ 'bg-green-500' if journal_stats[0].avg_stress <= 3 else 'bg-yellow-500' if journal_stats[0].avg_stress <= 7 else 'bg-red-500' }}"
+                     style="--journal-stress-width: {{ journal_stats[0].stress_width }}%"
+                     data-width="{{ journal_stats[0].stress_width }}">
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Recent Entries -->
+          <div class="mt-2">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Recent Entries</h3>
+            <div class="space-y-3">
+              {% for entry in journal_entries[:3] %}
+              <a href="{{ url_for('view_journal', entry_id=entry.id) }}" class="group block p-3 rounded-xl border border-gray-100 hover:bg-green-50/50 transition-colors">
+                <div class="flex justify-between items-start">
+                  <h4 class="font-medium text-gray-800 group-hover:text-green-700">
+                    {{ entry.title or 'Untitled' }}
+                  </h4>
+                  <span class="text-xs text-gray-400">{{ entry.created_at|datetimeformat('%b %d') }}</span>
+                </div>
+                {% if entry.content %}
+                <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ entry.content|striptags|truncate(100) }}</p>
+                {% endif %}
+              </a>
+              {% endfor %}
+            </div>
+          </div>
         </div>
         {% else %}
-        <div class="text-center py-8">
-          <i class="bi bi-controller text-gray-300 text-4xl mb-4"></i>
-          <p class="text-gray-500 mb-4">No games played yet</p>
-          <a
-            href="{{ url_for('games') }}"
-            class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition duration-300"
-            >Play Games</a
-          >
+        <div class="text-center py-8 px-4">
+          <div class="mx-auto w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
+            <i class="bi bi-journal-text text-green-500 text-2xl"></i>
+          </div>
+          <h3 class="text-gray-700 font-medium mb-1">No journal entries yet</h3>
+          <p class="text-gray-500 text-sm mb-4">Start journaling to track your thoughts and feelings</p>
+          <a href="{{ url_for('journal') }}" 
+             class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+            <i class="bi bi-plus-lg mr-2"></i> New Entry
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Breathing Exercises -->
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+            <i class="bi bi-wind text-purple-600 mr-2"></i>
+            Breathing Exercises
+          </h2>
+          <a href="{{ url_for('breathing') }}" class="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+            Start Session
+            <i class="bi bi-arrow-right ml-1"></i>
+          </a>
+        </div>
+        
+        {% if breathing_stats %}
+        <div class="space-y-5">
+          <!-- Total Sessions -->
+          <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-700 mb-1">Total Sessions</p>
+                <p class="text-2xl font-bold text-purple-700">
+                  {{ breathing_stats|map(attribute='technique_count')|sum }}
+                </p>
+              </div>
+              <div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <i class="bi bi-wind text-purple-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Techniques -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Your Techniques</h3>
+            <div class="space-y-3">
+              {% for stat in breathing_stats %}
+              <div class="group flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-purple-50/30 transition-colors">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                    <i class="bi bi-{{ 'clock' if stat.technique == 'box' else 'hourglass' if stat.technique == '4-7-8' else 'activity' }} text-purple-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-800 capitalize">{{ stat.technique|replace('-', ' ') }}</h4>
+                    <p class="text-xs text-gray-500">{{ stat.technique_count }} sessions</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">{{ (stat.total_duration / 60)|round|int }}<span class="text-xs font-normal text-gray-500"> min</span></p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Quick Start -->
+          <div class="mt-6">
+            <a href="{{ url_for('breathing') }}" class="block w-full text-center py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition-colors">
+              <i class="bi bi-play-circle mr-2"></i> Start Breathing Exercise
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-center py-8 px-4">
+          <div class="mx-auto w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
+            <i class="bi bi-wind text-purple-500 text-2xl"></i>
+          </div>
+          <h3 class="text-gray-700 font-medium mb-1">No breathing sessions yet</h3>
+          <p class="text-gray-500 text-sm mb-4">Practice breathing to reduce stress and anxiety</p>
+          <a href="{{ url_for('breathing') }}" 
+             class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
+            <i class="bi bi-play-circle mr-2"></i> Start Now
+          </a>
         </div>
         {% endif %}
       </div>
@@ -419,11 +574,19 @@ block content %}
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <a
-          href="{{ url_for('assessment') }}"
-          class="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition duration-300"
+          href="{{ url_for('personality_test') }}"
+          class="flex items-center justify-between p-4 bg-blue-50 rounded-lg hover:shadow-md transition-all duration-300"
         >
-          <i class="bi bi-clipboard-data text-blue-600 text-2xl mb-2"></i>
-          <span class="text-sm font-medium text-blue-800">Take Assessment</span>
+          <div class="flex items-center">
+            <div class="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4">
+              <i class="bi bi-clipboard-data text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">Personality Test</h3>
+              <p class="text-sm text-gray-500">Discover your personality traits and insights</p>
+            </div>
+          </div>
+          <span class="text-sm font-medium text-blue-800">Take Test</span>
         </a>
         <a
           href="{{ url_for('journal') }}"
@@ -448,233 +611,61 @@ block content %}
         </a>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- Plant Selection Modal -->
-<div id="plant-selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-xl p-6 w-full max-w-md">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-semibold text-gray-800">Choose Your Plant</h3>
-      <button onclick="closePlantSelection()" class="text-gray-500 hover:text-gray-700">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-    
-    <div class="grid grid-cols-2 gap-4">
-      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('sunflower')">
-        <div class="text-5xl mb-2">🌻</div>
-        <h4 class="font-medium">Sunflower</h4>
-        <p class="text-sm text-gray-500">Grows with positivity</p>
-      </div>
-      
-      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('cactus')">
-        <div class="text-5xl mb-2">🌵</div>
-        <h4 class="font-medium">Cactus</h4>
-        <p class="text-sm text-gray-500">Thrives in tough times</p>
-      </div>
-      
-      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('rose')">
-        <div class="text-5xl mb-2">🌹</div>
-        <h4 class="font-medium">Rose</h4>
-        <p class="text-sm text-gray-500">Beauty in progress</p>
-      </div>
-      
-      <div class="border rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition" onclick="selectPlant('bamboo')">
-        <div class="text-5xl mb-2">🎍</div>
-        <h4 class="font-medium">Bamboo</h4>
-        <p class="text-sm text-gray-500">Grows with patience</p>
-      </div>
-    </div>
-    
-    <div class="mt-6 flex justify-end">
-      <button onclick="closePlantSelection()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-        Cancel
-      </button>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .progress-bar {
+    width: 0;
+    transition: width 0.5s ease-in-out;
+  }
+  .progress-bar[data-width] {
+    width: var(--progress-width);
+  }
+</style>
+{% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
-// Plant growth stages (0-100%)
-const PLANT_STAGES = {
-  sunflower: [
-    { stage: 0, emoji: '🌱', message: 'Just planted a sunflower!' },
-    { stage: 20, emoji: '🌿', message: 'Your sunflower is sprouting!' },
-    { stage: 50, emoji: '🌻', message: 'Your sunflower is growing tall!' },
-    { stage: 80, emoji: '🌻🌻', message: 'Your sunflower is almost fully grown!' },
-    { stage: 100, emoji: '🌻🌻🌻', message: 'Your sunflower is in full bloom!' }
-  ],
-  cactus: [
-    { stage: 0, emoji: '🌵', message: 'A tiny cactus has been planted!' },
-    { stage: 20, emoji: '🌵', message: 'Your cactus is growing slowly...' },
-    { stage: 50, emoji: '🌵🌵', message: 'Your cactus is getting bigger!' },
-    { stage: 80, emoji: '🌵🌵🌵', message: 'Your cactus is thriving!' },
-    { stage: 100, emoji: '🌵🌸', message: 'Your cactus is blooming!' }
-  ],
-  rose: [
-    { stage: 0, emoji: '🌱', message: 'A rose has been planted!' },
-    { stage: 20, emoji: '🌿', message: 'Your rose bush is growing!' },
-    { stage: 50, emoji: '🌹', message: 'Your rose has buds!' },
-    { stage: 80, emoji: '🌹🌹', message: 'Your roses are almost ready!' },
-    { stage: 100, emoji: '🌹🌹🌹', message: 'Your roses are in full bloom!' }
-  ],
-  bamboo: [
-    { stage: 0, emoji: '🎍', message: 'A bamboo shoot has been planted!' },
-    { stage: 20, emoji: '🎍', message: 'Your bamboo is growing slowly...' },
-    { stage: 50, emoji: '🎍🎍', message: 'Your bamboo is getting taller!' },
-    { stage: 80, emoji: '🎍🎍🎍', message: 'Your bamboo is growing fast!' },
-    { stage: 100, emoji: '🎋', message: 'Your bamboo is fully grown!' }
-  ]
-};
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize progress bars
+  document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+    const width = bar.getAttribute('data-width');
+    if (width) {
+      bar.style.setProperty('--progress-width', `${width}%`);
+    }
+  });
 
-let currentPlant = {
-  growth: 0,
-  type: 'sunflower',
-  lastWatered: null
-};
+  // Simple message function
+  window.showMessage = function(message, type = 'success') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white`;
+    messageDiv.textContent = message;
+    document.body.appendChild(messageDiv);
+    
+    // Remove message after 3 seconds
+    setTimeout(() => {
+      messageDiv.remove();
+    }, 3000);
+  };
+});
 
 // Plant selection modal functions
 function openPlantSelection() {
-  document.getElementById('plant-selection-modal').classList.remove('hidden');
+  const modal = document.getElementById('plant-selection-modal');
+  if (modal) modal.classList.remove('hidden');
 }
 
 function closePlantSelection() {
-  document.getElementById('plant-selection-modal').classList.add('hidden');
+  const modal = document.getElementById('plant-selection-modal');
+  if (modal) modal.classList.add('hidden');
 }
-
-async function selectPlant(plantType) {
-  try {
-    const response = await fetch('/api/plants/select', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ plant_type: plantType })
-    });
-    
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      currentPlant.type = plantType;
-      updatePlantDisplay();
-      showMessage(result.message);
-      closePlantSelection();
-    } else {
-      showMessage(result.message || 'Failed to change plant', 'error');
-    }
-  } catch (error) {
-    console.error('Error selecting plant:', error);
-    showMessage('Error changing plant. Please try again.', 'error');
-  }
-}
-
-// Initialize plant from server data
-function initPlant(plantData) {
-  if (plantData) {
-    currentPlant = {
-      growth: plantData.growth_stage || 0,
-      type: plantData.plant_type || 'sunflower',
-      lastWatered: plantData.last_watered
-    };
-  }
-  updatePlantDisplay();
-  updateGamePoints();
-}
-
-// Update the plant display based on growth stage
-function updatePlantDisplay() {
-  const plantElement = document.getElementById('plant');
-  const statusElement = document.getElementById('plant-status');
-  
-  // Get the stages for the current plant type
-  const stages = PLANT_STAGES[currentPlant.type] || PLANT_STAGES.sunflower;
-  
-  // Find the appropriate growth stage
-  let currentStage = stages[0];
-  for (const stage of [...stages].reverse()) {
-    if (currentPlant.growth >= stage.stage) {
-      currentStage = stage;
-      break;
-    }
-  }
-  
-  // Update the display
-  plantElement.innerHTML = `<span class="text-6xl">${currentStage.emoji}</span>`;
-  statusElement.innerHTML = `${currentStage.message}<br><span class="font-medium" id="growth-percentage">${Math.round(currentPlant.growth)}%</span> grown`;
-  
-  // Update watering buttons state
-  const waterButtons = document.querySelectorAll('#water-buttons button');
-  waterButtons.forEach(btn => {
-    const points = parseInt(btn.textContent.match(/\d+/)[0]);
-    btn.disabled = currentPlant.growth >= 100 || points > (window.gamePoints || 0);
-  });
-}
-
-// Water the plant using game points
-async function waterPlant(points) {
-  try {
-    const response = await fetch('/api/plants/water', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ points })
-    });
-    
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      currentPlant.growth = result.new_growth;
-      updatePlantDisplay();
-      updateGamePoints();
-      showMessage(`Used ${points} point${points > 1 ? 's' : ''} to water your plant!`);
-    } else {
-      showMessage(result.message || 'Failed to water plant', 'error');
-    }
-  } catch (error) {
-    console.error('Error watering plant:', error);
-    showMessage('Error watering plant. Please try again.', 'error');
-  }
-}
-
-// Show a message to the user
-function showMessage(message, type = 'success') {
-  const messageElement = document.getElementById('plant-message');
-  messageElement.textContent = message;
-  messageElement.className = 'mt-3 text-sm ' + (type === 'error' ? 'text-red-600' : 'text-green-600');
-  
-  // Clear message after 3 seconds
-  setTimeout(() => {
-    messageElement.textContent = '';
-  }, 3000);
-}
-
-// Fetch and update game points
-async function updateGamePoints() {
-  try {
-    const response = await fetch('/api/games/scores');
-    const scores = await response.json();
-    if (scores.length > 0) {
-      window.gamePoints = scores[0].score || 0;
-      document.getElementById('game-points').textContent = window.gamePoints;
-    }
-  } catch (error) {
-    console.error('Error fetching game points:', error);
-  }
-}
-
-// Initialize when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  // Load initial plant data
-  fetch('/api/plants/me')
-    .then(response => response.json())
-    .then(initPlant)
-    .catch(console.error);
-  
-  // Update game points
-  updateGamePoints();
-});
 </script>
 {% endblock %}

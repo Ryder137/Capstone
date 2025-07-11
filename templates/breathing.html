@@ -126,7 +126,7 @@ endblock %} {% block content %}
           </div>
           <div class="mt-2 text-sm text-gray-600">
             <span id="current-cycle">0</span> /
-            <span id="total-cycles">10</span> cycles
+            <span id="total-cycles">3</span> cycles
           </div>
         </div>
       </div>
@@ -244,63 +244,6 @@ endblock %} {% block content %}
           </ul>
         </div>
       </div>
-    </div>
-
-    <!-- Emergency Breathing Techniques -->
-    <div
-      class="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl text-white p-8"
-    >
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold mb-4">Emergency Techniques</h2>
-        <p class="text-xl opacity-90">
-          Quick breathing exercises for immediate stress relief
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
-          <i class="bi bi-lightning text-4xl mb-4"></i>
-          <h3 class="text-lg font-semibold mb-2">30-Second Reset</h3>
-          <p class="text-sm opacity-90 mb-4">
-            Quick technique for immediate anxiety relief
-          </p>
-          <button
-            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
-            data-type="emergency"
-          >
-            Try Now
-          </button>
-        </div>
-
-        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
-          <i class="bi bi-heart-pulse text-4xl mb-4"></i>
-          <h3 class="text-lg font-semibold mb-2">Panic Attack Relief</h3>
-          <p class="text-sm opacity-90 mb-4">
-            Specialized breathing for panic episodes
-          </p>
-          <button
-            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
-            data-type="panic"
-          >
-            Try Now
-          </button>
-        </div>
-
-        <div class="bg-white bg-opacity-20 rounded-lg p-6 text-center">
-          <i class="bi bi-moon text-4xl mb-4"></i>
-          <h3 class="text-lg font-semibold mb-2">Sleep Preparation</h3>
-          <p class="text-sm opacity-90 mb-4">
-            Calming breath work for better sleep
-          </p>
-          <button
-            class="bg-white text-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 emergency-breath"
-            data-type="sleep"
-          >
-            Try Now
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 {% endblock %} {% block scripts %}
@@ -309,7 +252,7 @@ endblock %} {% block content %}
     constructor() {
       this.isActive = false;
       this.currentCycle = 0;
-      this.totalCycles = 10;
+      this.totalCycles = 3;
       this.currentPhase = "";
       this.phaseTimer = null;
       this.sessionTimer = null;

@@ -36,7 +36,7 @@
                 <div class="px-6 space-y-1">
                     <a href="{{ url_for('admin_dashboard') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_dashboard' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
                         <i class="bi-speedometer2 mr-3 {% if request.endpoint == 'admin_dashboard' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
-                        Dashboard
+                        Dashboard 
                     </a>
                     <a href="{{ url_for('admin_users') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_users' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
                         <i class="bi-people mr-3 {% if request.endpoint == 'admin_users' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
@@ -45,10 +45,6 @@
                     <a href="{{ url_for('admin_wellbeing') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_wellbeing' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
                         <i class="bi-heart-pulse mr-3 {% if request.endpoint == 'admin_wellbeing' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
                         Well-being
-                    </a>
-                    <a href="{{ url_for('admin_assessments') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_assessments' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
-                        <i class="bi-clipboard-data mr-3 {% if request.endpoint == 'admin_assessments' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>
-                        Assessments
                     </a>
                     <a href="{{ url_for('admin_content') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {% if request.endpoint == 'admin_content' %}bg-indigo-800 text-white{% else %}text-indigo-100 hover:bg-indigo-600 hover:text-white{% endif %}">
                         <i class="bi-file-earmark-text mr-3 {% if request.endpoint == 'admin_content' %}text-indigo-200{% else %}text-indigo-300 group-hover:text-indigo-200{% endif %}"></i>

@@ -1,0 +1,1174 @@
+{% extends "base_new.html" %}
+{% block title %}Personality Test - UniCare{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-16 bg-gradient-to-br from-blue-50 to-purple-50 flex items-start" data-is-authenticated="{{ 'true' if is_authenticated else 'false' }}">
+  <div class="max-w-4xl w-full mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">
+        Personality Test
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        This assessment will help you understand your personality traits and mental well-being.
+        Please answer honestly for the most accurate results.
+      </p>
+      <div class="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+        <p class="text-sm text-blue-800">
+          <i class="bi bi-info-circle mr-2"></i>
+          This test is for self-assessment only and not a substitute for professional advice.
+          {% if not is_authenticated %}
+          <br>You're taking this test as a guest. <a href="{{ url_for('login') }}" class="font-semibold text-blue-600 hover:text-blue-800">Log in</a> to save your results and track your progress over time.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-8">
+      <div id="assessment-form" class="w-full max-w-3xl mx-auto">
+        <!-- Category Selection View -->
+        <div id="category-selection" class="space-y-6 text-center">
+          <h2 class="text-2xl font-bold text-gray-800 mb-8">Select a Category to Begin</h2>
+          <p class="text-gray-600 mb-8">Complete one category at a time. Each category has 10 questions.</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for category_id, category in categories.items() %}
+            <div class="category-card p-6 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition duration-300 cursor-pointer" 
+                 data-category-id="{{ category_id }}">
+              <div class="category-icon-container bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                <i class="bi bi-person-lines-fill text-2xl text-blue-600 transition-colors duration-300"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ category.name }}</h3>
+              <p class="text-gray-600 text-sm">{{ category.description }}</p>
+              <div class="mt-4 text-xs text-gray-500">{{ category.questions|length }} questions</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Questions View (initially hidden) -->
+        <div id="questions-view" class="hidden w-full flex flex-col h-[85vh] min-h-[500px]">
+          <!-- Fixed header section -->
+          <div class="flex-none bg-white p-5 rounded-t-xl shadow-sm border-b border-gray-100">
+            <div class="flex flex-col space-y-4">
+              <div class="flex justify-between items-start">
+                <button id="back-to-categories" class="text-blue-600 hover:text-blue-800 flex items-center text-sm sm:text-base font-medium">
+                  <i class="bi bi-arrow-left mr-2"></i> Back to Categories
+                </button>
+                
+                <div class="text-right bg-blue-50 px-3 py-2 rounded-lg">
+                  <div class="text-sm font-semibold text-blue-800" id="current-category"></div>
+                  <div class="text-xs font-medium text-blue-600" id="progress-text">
+                    <span id="current-question">1</span> of <span id="total-questions">10</span> questions
+                  </div>
+                </div>
+              </div>
+
+              <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out" 
+                     style="width: 0%" 
+                     id="progress-bar">
+                  <div class="h-full w-full flex items-center justify-end pr-2">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scrollable questions section -->
+          <div id="questions-container" class="flex-1 overflow-y-auto p-4 sm:p-6 bg-white">
+            <!-- Questions will be loaded here by JavaScript -->
+          </div>
+
+          <!-- Fixed footer with navigation buttons -->
+          <div class="flex-none bg-white p-4 border-t border-gray-100 shadow-lg">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+              <button id="prev-btn" class="w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition duration-300 hidden">
+                <i class="bi bi-arrow-left mr-2"></i>Previous
+              </button>
+              
+              <div class="flex-1 flex justify-center sm:justify-end space-x-3 w-full sm:w-auto">
+                <button id="next-btn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next <i class="bi bi-arrow-right ml-2"></i>
+                </button>
+                <button id="submit-result-btn" class="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition duration-300 hidden ml-0 sm:ml-2">
+                  Submit Result
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="test-loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p class="text-gray-700">Processing your results...</p>
+        </div>
+      </div>
+
+      <!-- Results Modal -->
+      <div id="resultsModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-xl border border-gray-100">
+          <div class="text-center relative">
+            <button id="closeModal" class="absolute right-0 top-0 text-gray-400 hover:text-gray-600 transition-colors">
+              <i class="bi bi-x-lg text-2xl"></i>
+            </button>
+            
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50" id="result-icon">
+              <i class="bi bi-emoji-smile text-5xl text-indigo-500"></i>
+            </div>
+            
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 font-serif">Your Wellness Check</h2>
+            <div id="result-level" class="inline-block px-6 py-2 rounded-full text-base font-medium mb-6 bg-indigo-50 text-indigo-700"></div>
+            
+            <div class="bg-white p-8 rounded-xl shadow-inner border border-gray-100 mb-6 text-left">
+              <div class="space-y-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-800 mb-1">How you're feeling</h3>
+                  <p id="result-description" class="text-gray-700 leading-relaxed"></p>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-100">
+                  <h3 class="text-lg font-semibold text-gray-800 mb-3">Your current state</h3>
+                  <div class="w-full bg-gray-100 rounded-full h-3 mb-2 overflow-hidden">
+                    <div id="overall-score-bar" class="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-1000" style="width: 0%;"></div>
+                  </div>
+                  <p id="overall-score-text" class="text-center text-sm text-gray-600 italic">Your wellness level</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded, initializing test...');
+    
+    // DOM Elements
+    const categorySelection = document.getElementById('category-selection');
+    const questionsView = document.getElementById('questions-view');
+    const questionsContainer = document.getElementById('questions-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitResultBtn = document.getElementById('submit-result-btn');
+    const backToCategoriesBtn = document.getElementById('back-to-categories');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const currentCategoryElement = document.getElementById('current-category');
+    const categoryNameElement = document.getElementById('category-name');
+    const resultScore = document.getElementById('result-score');
+    const resultLevel = document.getElementById('result-level');
+    const resultDescription = document.getElementById('result-description');
+    const assessmentForm = document.getElementById('assessment-form');
+    const testLoading = document.getElementById('test-loading');
+    const testResults = document.getElementById('test-results');
+    
+    // Debug log all elements
+    console.log('DOM Elements initialized:', {
+      categorySelection: !!categorySelection,
+      questionsView: !!questionsView,
+      questionsContainer: !!questionsContainer,
+      prevBtn: !!prevBtn,
+      nextBtn: !!nextBtn,
+      submitResultBtn: !!submitResultBtn,
+      backToCategoriesBtn: !!backToCategoriesBtn,
+      progressBar: !!progressBar,
+      progressText: !!progressText,
+      currentCategoryElement: !!currentCategoryElement,
+      categoryNameElement: !!categoryNameElement,
+      resultScore: !!resultScore,
+      resultLevel: !!resultLevel,
+      resultDescription: !!resultDescription,
+      assessmentForm: !!assessmentForm,
+      testLoading: !!testLoading,
+      testResults: !!testResults
+    });
+    
+    // Log category cards
+    const categoryCards = document.querySelectorAll('.category-card');
+    console.log(`Found ${categoryCards.length} category cards in the DOM`);
+    categoryCards.forEach((card, index) => {
+      console.log(`Category card ${index + 1}:`, {
+        id: card.getAttribute('data-category-id'),
+        text: card.textContent.trim().replace(/\s+/g, ' ').substring(0, 50) + '...',
+        hasClickHandler: !!card.onclick
+      });
+    });
+    
+    // State
+    let currentQuestionIndex = 0;
+    let currentCategoryId = null;
+    let currentCategoryQuestions = [];
+    let answers = {};
+    let categoryAnswers = {}; // Track answers by category
+    const completedCategories = new Set();
+    
+    // Categories data from the server
+    const categoriesJson = '{{ categories|tojson|safe }}';
+    console.log('Raw categories JSON:', categoriesJson);
+    
+    let categoriesData = {};
+    try {
+      categoriesData = JSON.parse(categoriesJson);
+      console.log('Categories data parsed successfully:', categoriesData);
+      
+      if (categoriesData && typeof categoriesData === 'object') {
+        console.log('Number of categories:', Object.keys(categoriesData).length);
+        Object.entries(categoriesData).forEach(([id, category]) => {
+          console.log(`Category ${id}: ${category.name} (${category.questions?.length || 0} questions)`);
+        });
+      } else {
+        console.error('Invalid categories data format');
+      }
+    } catch (error) {
+      console.error('Error parsing categories data:', error);
+    }
+    
+    // Helper function to get cookie value
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    // Initialize the test
+    function init() {
+      try {
+        console.log('Initializing test...');
+        console.log('Raw categories data:', categoriesData);
+        console.log('Categories data type:', typeof categoriesData);
+        
+        if (categoriesData && typeof categoriesData === 'object') {
+          console.log('Categories keys:', Object.keys(categoriesData));
+          
+          // Verify the structure of the first category
+          if (Object.keys(categoriesData).length > 0) {
+            const firstKey = Object.keys(categoriesData)[0];
+            const firstCat = categoriesData[firstKey];
+            console.log('First category key:', firstKey);
+            console.log('First category data:', firstCat);
+            
+            if (firstCat && typeof firstCat === 'object') {
+              console.log('First category name:', firstCat.name);
+              console.log('Questions in first category:', firstCat.questions ? firstCat.questions.length : 0);
+              if (firstCat.questions && firstCat.questions.length > 0) {
+                console.log('First question in category:', firstCat.questions[0]);
+              }
+            }
+          }
+        } else {
+          console.error('Invalid categories data format');
+          return;
+        }
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Debug: Try to start the first category if in development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          const firstCategoryId = Object.keys(categoriesData)[0];
+          if (firstCategoryId) {
+            console.log('Auto-starting first category for development:', firstCategoryId);
+            // Uncomment the line below for testing
+            // startCategory(firstCategoryId);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing test:', error);
+      }
+    }
+    
+    // Show category selection
+    function showCategorySelection() {
+      categorySelection.classList.remove('hidden');
+      questionsView.classList.add('hidden');
+      updateCategoryCards();
+    }
+    
+    // Update category cards to show completion status
+    function updateCategoryCards() {
+      document.querySelectorAll('.category-card').forEach(card => {
+        const categoryId = card.getAttribute('data-category-id');
+        
+        // Find or create the completed badge
+        let completedBadge = card.querySelector('.completed-badge');
+        if (!completedBadge) {
+          completedBadge = document.createElement('div');
+          completedBadge.className = 'completed-badge absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center shadow-md';
+          completedBadge.innerHTML = '<i class="bi bi-check"></i>';
+          card.style.position = 'relative';
+          card.appendChild(completedBadge);
+        }
+        
+        // Find the icon container inside the card
+        const iconContainer = card.querySelector('.category-icon-container');
+        
+        if (completedCategories.has(categoryId)) {
+          // Add completed styles
+          card.classList.add('border-green-400', 'bg-green-50', 'shadow-sm');
+          card.classList.remove('hover:border-blue-300');
+          card.classList.add('hover:border-green-400');
+          completedBadge.classList.remove('hidden');
+          
+          // Update icon container if it exists
+          if (iconContainer) {
+            iconContainer.classList.remove('bg-blue-50');
+            iconContainer.classList.add('bg-green-100');
+            const icon = iconContainer.querySelector('i');
+            if (icon) {
+              icon.classList.remove('text-blue-600');
+              icon.classList.add('text-green-600');
+            }
+          }
+        } else {
+          // Reset to default styles
+          card.classList.remove('border-green-400', 'bg-green-50', 'shadow-sm');
+          card.classList.add('hover:border-blue-300');
+          card.classList.remove('hover:border-green-400');
+          completedBadge.classList.add('hidden');
+          
+          // Reset icon container if it exists
+          if (iconContainer) {
+            iconContainer.classList.add('bg-blue-50');
+            iconContainer.classList.remove('bg-green-100');
+            const icon = iconContainer.querySelector('i');
+            if (icon) {
+              icon.classList.add('text-blue-600');
+              icon.classList.remove('text-green-600');
+            }
+          }
+        }
+      });
+    }
+    
+    // Start a category
+    function startCategory(categoryId) {
+      console.group('startCategory');
+      try {
+        console.log('Starting category with ID:', categoryId);
+        console.log('Available category IDs:', Object.keys(categoriesData));
+        console.log('categorySelection element exists:', !!categorySelection);
+        console.log('questionsView element exists:', !!questionsView);
+        
+        // Set the current category ID
+        currentCategoryId = categoryId;
+        console.log('Set currentCategoryId to:', currentCategoryId);
+        
+        // Validate category ID
+        if (!categoryId) {
+          const errorMsg = 'No category ID provided';
+          console.error(errorMsg);
+          alert(errorMsg);
+          return;
+        }
+        
+        // Get category data
+        const category = categoriesData[categoryId];
+        console.log('Category data:', category);
+        
+        if (!category) {
+          const errorMsg = `Category not found: ${categoryId}. Available categories: ${Object.keys(categoriesData).join(', ')}`;
+          console.error(errorMsg);
+          alert('Error: Could not load category. Please try again.');
+          return;
+        }
+        
+        // Initialize questions
+        currentCategoryQuestions = Array.isArray(category.questions) ? category.questions : [];
+        currentQuestionIndex = 0;
+        
+        console.log(`Loaded ${currentCategoryQuestions.length} questions for category ${categoryId}`);
+        
+        if (currentCategoryQuestions.length === 0) {
+          const errorMsg = `No questions found for category: ${categoryId}`;
+          console.error(errorMsg);
+          alert('Error: No questions found for this category. Please try another category.');
+          return;
+        }
+        
+        // Update UI
+        if (!categorySelection || !questionsView) {
+          const errorMsg = 'Required UI elements not found. categorySelection: ' + 
+                         (categorySelection ? 'found' : 'missing') + 
+                         ', questionsView: ' + 
+                         (questionsView ? 'found' : 'missing');
+          console.error(errorMsg);
+          alert('Error: Could not initialize test interface.');
+          return;
+        }
+        
+        // Show questions view
+        console.log('Showing questions view, hiding category selection');
+        categorySelection.classList.add('hidden');
+        questionsView.classList.remove('hidden');
+        
+        // Update category name in UI
+        const categoryName = category.name || 'Category';
+        console.log('Setting category name to:', categoryName);
+        
+        if (currentCategoryElement) {
+          currentCategoryElement.textContent = categoryName;
+        } else {
+          console.warn('currentCategoryElement not found');
+        }
+        
+        if (categoryNameElement) {
+          categoryNameElement.textContent = categoryName;
+        } else {
+          console.warn('categoryNameElement not found');
+        }
+        
+        // Reset progress
+        updateProgress();
+        
+        // Show first question
+        console.log('Showing first question');
+        showCurrentQuestion();
+        
+      } catch (error) {
+        console.error('Error in startCategory:', error);
+        alert('An error occurred while loading the category. Please try again.');
+      } finally {
+        console.groupEnd();
+      }
+    }
+    
+    // Show current question
+    function showCurrentQuestion() {
+      try {
+        console.log('showCurrentQuestion called. Index:', currentQuestionIndex, 'Category:', currentCategoryId);
+        
+        // Validate state
+        if (!currentCategoryQuestions || currentQuestionIndex >= currentCategoryQuestions.length) {
+          console.error('No questions or invalid index');
+          if (currentCategoryQuestions) {
+            console.error('Current index:', currentQuestionIndex, 'Total questions:', currentCategoryQuestions.length);
+          }
+          return;
+        }
+        
+        const question = currentCategoryQuestions[currentQuestionIndex];
+        if (!question || !question.id || !question.question) {
+          console.error('Invalid question data:', question);
+          return;
+        }
+        
+        console.log('Showing question:', question.id, '-', question.question.substring(0, 30) + '...');
+        
+        // Create question HTML
+        const questionHTML = `
+          <div class="question-slide animate-fade-in">
+            <div class="mb-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">
+                ${question.question}
+              </h3>
+            </div>
+            <div class="space-y-3" id="options-container">
+              ${(question.options || []).map((option, index) => {
+                const isChecked = getAnswer(question.id) === index;
+                return `
+                  <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition duration-300">
+                    <input
+                      type="radio"
+                      name="question_${question.id}"
+                      value="${index}"
+                      class="hidden answer-radio"
+                      data-question-id="${question.id}"
+                      ${isChecked ? 'checked' : ''}
+                    />
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-4 flex items-center justify-center radio-indicator">
+                      <div class="w-3 h-3 bg-blue-600 rounded-full radio-dot" style="display: ${isChecked ? 'block' : 'none'}"></div>
+                    </div>
+                    <span class="text-gray-700">${option || 'Option ' + (index + 1)}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+        
+        // Update the DOM
+        if (questionsContainer) {
+          questionsContainer.innerHTML = questionHTML;
+          
+          // Update navigation and progress
+          updateNavigation();
+          updateProgress();
+          
+          // Setup event listeners for the new radio buttons
+          setupRadioButtonListeners();
+          
+
+        } else {
+          console.error('Questions container not found');
+        }
+      } catch (error) {
+        console.error('Error in showCurrentQuestion:', error);
+        alert('An error occurred while loading the question. Please try again.');
+      }
+    }
+    
+    // Get answer for a question
+    function getAnswer(questionId) {
+      const categoryAnswers = answers[currentCategoryId] || {};
+      return categoryAnswers[questionId];
+    }
+    
+    // Set answer for a question
+    function setAnswer(questionId, answerIndex) {
+      if (!answers[currentCategoryId]) {
+        answers[currentCategoryId] = {};
+      }
+      answers[currentCategoryId][questionId] = answerIndex;
+      updateNavigation();
+    }
+    
+    // Update progress bar and text
+    function updateProgress() {
+      console.log('updateProgress called. Index:', currentQuestionIndex, 'Questions:', currentCategoryQuestions?.length);
+      if (!currentCategoryQuestions || currentCategoryQuestions.length === 0) {
+        console.error('No questions in current category');
+        return;
+      }
+      
+      const progress = ((currentQuestionIndex + 1) / currentCategoryQuestions.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${currentCategoryQuestions.length}`;
+      console.log('Progress updated:', progressText.textContent);
+    }
+    
+    // Update navigation buttons state
+    function updateNavigation() {
+      if (!currentCategoryQuestions) return;
+      
+      // Check if this is the last category
+      const allCategoryIds = Object.keys(categoriesData || {});
+      const isLastCategory = allCategoryIds.length > 0 && 
+                           allCategoryIds.every(id => completedCategories.has(id) || id === currentCategoryId);
+      
+      // Previous button
+      if (currentQuestionIndex === 0) {
+        prevBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.remove('hidden');
+      }
+      
+      // Next/Submit button
+      if (currentQuestionIndex === currentCategoryQuestions.length - 1) {
+        nextBtn.classList.add('hidden');
+        submitResultBtn.classList.remove('hidden');
+        // Update button text based on whether this is the last category
+        submitResultBtn.textContent = isLastCategory ? 'Get Results' : 'Submit Result';
+      } else {
+        nextBtn.classList.remove('hidden');
+        submitResultBtn.classList.add('hidden');
+      }
+      
+      // Check if current question is answered
+      const currentQuestion = currentCategoryQuestions[currentQuestionIndex];
+      const isAnswered = currentQuestion && getAnswer(currentQuestion.id) !== undefined;
+      
+      // Disable next button if current question not answered
+      nextBtn.disabled = !isAnswered;
+      if (nextBtn.disabled) {
+        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      
+      // Enable submit button only if all questions are answered
+      if (currentCategoryId) {
+        const allAnswered = currentCategoryQuestions.every(q => getAnswer(q.id) !== undefined);
+        submitResultBtn.disabled = !allAnswered;
+        if (submitResultBtn.disabled) {
+          submitResultBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          submitResultBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    }
+    
+    // Set up event listeners
+    function setupEventListeners() {
+      console.log('Setting up event listeners...');
+      
+      try {
+        // Category selection
+        const categoryCards = document.querySelectorAll('.category-card');
+        console.log(`Found ${categoryCards.length} category cards`);
+        
+        categoryCards.forEach((card, index) => {
+          console.log(`Setting up click handler for category card ${index}:`, card);
+          card.addEventListener('click', (e) => {
+            console.log('Category card clicked, event:', e);
+            try {
+              const categoryId = card.getAttribute('data-category-id');
+              console.log('Category ID from card:', categoryId);
+              console.log('Categories data available:', Object.keys(categoriesData));
+              if (!categoryId) {
+                console.error('No category ID found on clicked card');
+                return;
+              }
+              startCategory(categoryId);
+            } catch (error) {
+              console.error('Error handling category card click:', error);
+            }
+          });
+          console.log(`Click handler added to card ${index}`);
+        });
+        
+        // Back to categories button
+        if (backToCategoriesBtn) {
+          backToCategoriesBtn.addEventListener('click', showCategorySelection);
+          console.log('Back to categories button listener added');
+        } else {
+          console.warn('Back to categories button not found');
+        }
+        
+        // Previous button
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            try {
+              if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showCurrentQuestion();
+              }
+            } catch (error) {
+              console.error('Error handling previous button click:', error);
+            }
+          });
+          console.log('Previous button listener added');
+        } else {
+          console.warn('Previous button not found');
+        }
+        
+        // Next button
+        if (nextBtn) {
+          nextBtn.addEventListener('click', (e) => {
+            try {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Next clicked. Current index:', currentQuestionIndex, 
+                         'Total questions:', currentCategoryQuestions ? currentCategoryQuestions.length : 0);
+              
+              // Validate current question is answered
+              const currentQuestion = currentCategoryQuestions && currentCategoryQuestions[currentQuestionIndex];
+              if (currentQuestion && getAnswer(currentQuestion.id) === undefined) {
+                console.log('Please answer the current question first');
+                // Show error message to user
+                alert('Please select an answer before continuing.');
+                return;
+              }
+              
+              if (currentCategoryQuestions && currentQuestionIndex < currentCategoryQuestions.length - 1) {
+                currentQuestionIndex++;
+                console.log('Moving to question index:', currentQuestionIndex);
+                showCurrentQuestion();
+              } else {
+                console.log('Already at last question');
+              }
+            } catch (error) {
+              console.error('Error handling next button click:', error);
+            }
+          });
+          console.log('Next button listener added');
+        } else {
+          console.warn('Next button not found');
+        }
+        
+        // Submit result button
+        if (submitResultBtn) {
+          submitResultBtn.addEventListener('click', function(e) {
+            console.log('Submit button clicked', {
+              currentCategoryId,
+              currentQuestionIndex,
+              currentCategoryQuestions: currentCategoryQuestions ? currentCategoryQuestions.length : 0,
+              answers: answers ? Object.keys(answers) : 'none',
+              completedCategories: completedCategories ? Array.from(completedCategories) : 'none',
+              eventTarget: e.target ? e.target.outerHTML : 'no target'
+            });
+            
+            // Prevent default to avoid any form submission
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Call submitCategory with the event
+            submitCategory(e);
+          });
+          console.log('Submit result button listener added to:', submitResultBtn);
+        } else {
+          console.warn('Submit result button not found in DOM');
+        }
+        
+        console.log('Event listeners setup complete');
+      } catch (error) {
+        console.error('Error setting up event listeners:', error);
+      }
+    }
+    
+    // Set up radio button event listeners
+    function setupRadioButtonListeners() {
+      document.querySelectorAll('.answer-radio').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const questionId = parseInt(radio.getAttribute('data-question-id'));
+          const answerIndex = parseInt(radio.value);
+          
+          // Update answer
+          setAnswer(questionId, answerIndex);
+          
+          // Update radio UI
+          const questionElement = radio.closest('.question-slide');
+          questionElement.querySelectorAll('.radio-indicator').forEach(indicator => {
+            indicator.querySelector('.radio-dot').style.display = 'none';
+          });
+          radio.nextElementSibling.querySelector('.radio-dot').style.display = 'block';
+        });
+      });
+    }
+    
+    // Submit current category
+    function submitCategory(e) {
+      console.log('submitCategory called', { 
+        event: e ? e.type : 'programmatic',
+        currentCategoryId,
+        currentQuestionIndex,
+        currentCategoryQuestions: currentCategoryQuestions ? currentCategoryQuestions.length : 0,
+        stack: new Error().stack
+      });
+      
+      if (!currentCategoryId) {
+        console.error('No current category ID. Current state:', {
+          categoriesData: Object.keys(categoriesData || {}),
+          completedCategories: Array.from(completedCategories || []),
+          answers: answers ? Object.keys(answers) : 'none',
+          url: window.location.href
+        });
+        return;
+      }
+      
+      try {
+        // Mark category as completed
+        completedCategories.add(currentCategoryId);
+        console.log('Marked category as completed:', currentCategoryId);
+        
+        // Initialize categoryAnswers if not already done
+        if (typeof categoryAnswers === 'undefined') {
+          categoryAnswers = {};
+        }
+        
+        // Save category answers
+        categoryAnswers[currentCategoryId] = {
+          answers: { ...(answers[currentCategoryId] || {}) }, // Create a copy of the answers
+          completedAt: new Date().toISOString()
+        };
+        
+        console.log('Saved category answers:', categoryAnswers[currentCategoryId]);
+        
+        // Debug: Log all category IDs and completed categories
+        console.log('All category IDs:', Object.keys(categoriesData));
+        console.log('Completed categories:', Array.from(completedCategories));
+        
+        // Check if all categories are completed
+        const allCategoryIds = Object.keys(categoriesData);
+        const allCategoriesCompleted = allCategoryIds.every(id => completedCategories.has(id));
+        console.log('All categories completed?', allCategoriesCompleted);
+        
+        if (allCategoriesCompleted) {
+          console.log('All categories completed, submitting test...');
+          // All categories completed, submit the test
+          submitTest();
+        } else {
+          console.log('Showing category selection for next category...');
+          // Show category selection to choose next category
+          showCategorySelection();
+        }
+      } catch (error) {
+        console.error('Error in submitCategory:', error);
+        alert('There was an error saving your progress. Please try again.');
+      }
+    }
+    
+    // Prepare answers for submission
+    function prepareAnswersForSubmission() {
+      console.log('prepareAnswersForSubmission called');
+      const allAnswers = [];
+      
+      try {
+        // Ensure categoryAnswers exists and is an object
+        if (!categoryAnswers || typeof categoryAnswers !== 'object') {
+          console.error('categoryAnswers is not properly initialized:', categoryAnswers);
+          categoryAnswers = {}; // Initialize if not already done
+        }
+        
+        console.log('Current categoryAnswers:', categoryAnswers);
+        
+        // Flatten answers from all categories
+        for (const [categoryId, categoryData] of Object.entries(categoryAnswers)) {
+          if (!categoryData || !categoryData.answers) {
+            console.warn(`No answers found for category ${categoryId}`);
+            continue;
+          }
+          
+          console.log(`Processing category ${categoryId} with answers:`, categoryData.answers);
+          
+          for (const [questionId, answerIndex] of Object.entries(categoryData.answers)) {
+            allAnswers.push({
+              question_id: parseInt(questionId),
+              answer: answerIndex,
+              category_id: categoryId,
+              answered_at: categoryData.completedAt || new Date().toISOString()
+            });
+          }
+        }
+        
+        console.log('Prepared answers for submission:', allAnswers);
+        return allAnswers;
+      } catch (error) {
+        console.error('Error preparing answers for submission:', error);
+        throw error; // Re-throw to be caught by the caller
+      }
+    }
+    
+    // Submit test
+    async function submitTest() {
+      console.log('submitTest called');
+      // Show loading state
+      const testLoading = document.getElementById('test-loading');
+      const questionsView = document.getElementById('questions-view');
+      const testResults = document.getElementById('results-container');
+      
+      if (testLoading) testLoading.classList.remove('hidden');
+      if (questionsView) questionsView.classList.add('hidden');
+      
+      try {
+        // Prepare data
+        const data = {
+          answers: prepareAnswersForSubmission()
+        };
+        
+        console.log('Submitting test with data:', data);
+        
+        // Send to server
+        const response = await fetch('/submit-personality-test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrf_token') || ''
+          },
+          credentials: 'same-origin',
+          
+          body: JSON.stringify(data)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Server returned ${response.status}`);
+        }
+        
+        const responseData = await response.json();
+        console.log('Test submission successful:', responseData);
+        
+        // Show results
+        showResults(responseData);
+      } catch (error) {
+        console.error('Error submitting test:', error);
+        alert('There was an error submitting your test. Please try again. ' + error.message);
+      } finally {
+        if (testLoading) testLoading.classList.add('hidden');
+      }
+    }
+    
+    // Show results in modal
+    function showResults(data) {
+      console.log('showResults called with data:', data);
+      
+      if (!data) {
+        console.error('No data provided to showResults');
+        alert('Error: No test results data available');
+        return;
+      }
+      
+      const modal = document.getElementById('resultsModal');
+      const loading = document.getElementById('test-loading');
+      const questionsView = document.getElementById('questions-view');
+      const closeModalBtn = document.getElementById('closeModal');
+      
+      // Hide loading indicator if visible
+      if (loading) loading.classList.add('hidden');
+      
+      // Ensure modal exists
+      if (!modal) {
+        console.error('Results modal not found in the DOM');
+        return;
+      }
+      
+      // Hide questions view and show modal
+      if (questionsView) questionsView.classList.add('hidden');
+      
+      // Show the modal
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+      
+      // Close modal when clicking the close button
+      if (closeModalBtn) {
+        // Remove any existing event listeners to prevent duplicates
+        const newCloseBtn = closeModalBtn.cloneNode(true);
+        closeModalBtn.parentNode.replaceChild(newCloseBtn, closeModalBtn);
+        
+        newCloseBtn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          document.body.style.overflow = 'auto'; // Re-enable scrolling
+          showCategorySelection(); // Go back to category selection after closing
+        });
+      }
+      
+      // Close modal when clicking outside the modal content
+      const modalClickHandler = (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+          document.body.style.overflow = 'auto'; // Re-enable scrolling
+          showCategorySelection(); // Go back to category selection after closing
+          modal.removeEventListener('click', modalClickHandler); // Clean up
+        }
+      };
+      
+      // Add the click handler
+      modal.addEventListener('click', modalClickHandler);
+      
+      // Get all required elements with null checks
+      const resultLevel = document.getElementById('result-level');
+      const resultDescription = document.getElementById('result-description');
+      const overallScoreText = document.getElementById('overall-score-text');
+      const overallScoreBar = document.getElementById('overall-score-bar');
+      const resultIcon = document.getElementById('result-icon');
+      
+      // Log any missing elements for debugging
+      [
+        { name: 'result-level', element: resultLevel },
+        { name: 'result-description', element: resultDescription },
+        { name: 'overall-score-text', element: overallScoreText },
+        { name: 'overall-score-bar', element: overallScoreBar },
+        { name: 'result-icon', element: resultIcon }
+      ].forEach(({name, element}) => {
+        if (!element) {
+          console.error(`Required element not found: ${name}`);
+        }
+      });
+      
+      // Calculate overall score (0-100)
+      const overallScore = Math.round(data.overall_score || 0);
+      console.log('Overall score:', overallScore);
+      
+      // Determine result level and styling
+      let level, description, iconClass, bgClass, textClass, barColor;
+      
+      if (overallScore < 30) {
+        level = 'Needs Attention';
+        description = 'You might be going through a tough time. Remember to take things one step at a time and be kind to yourself.';
+        iconClass = 'bi-emoji-frown';
+        barColor = 'from-rose-400 to-pink-500';
+        bgClass = 'bg-rose-100';
+        textClass = 'text-rose-800';
+      } else if (overallScore < 70) {
+        level = 'Doing Okay';
+        description = 'You\'re managing, but there might be some areas where you could use more support. Small steps can lead to big changes.';
+        iconClass = 'bi-emoji-neutral';
+        barColor = 'from-amber-400 to-orange-500';
+        bgClass = 'bg-amber-100';
+        textClass = 'text-amber-800';
+      } else {
+        level = 'Thriving';
+        description = 'You\'re doing great! You seem to be managing well. Keep up the good work and remember to maintain healthy habits.';
+        iconClass = 'bi-emoji-smile';
+        barColor = 'from-emerald-400 to-teal-500';
+        bgClass = 'bg-emerald-100';
+        textClass = 'text-emerald-800';
+      }
+      
+      // Update UI elements if they exist
+      if (resultLevel) {
+        resultLevel.textContent = level;
+        resultLevel.className = `inline-block px-6 py-2 rounded-full text-base font-medium ${bgClass} ${textClass} mb-6`;
+      }
+      
+      if (resultDescription) {
+        resultDescription.textContent = description;
+      }
+      
+      if (resultIcon && resultIcon.querySelector('i')) {
+        const iconElement = resultIcon.querySelector('i');
+        iconElement.className = `bi ${iconClass} text-5xl`;
+        
+        // Update icon color based on score
+        if (overallScore < 30) {
+          resultIcon.className = resultIcon.className.replace(/from-\w+-\d+ to-\w+-\d+/g, 'from-rose-100 to-pink-100');
+          iconElement.className += ' text-rose-500';
+        } else if (overallScore < 70) {
+          resultIcon.className = resultIcon.className.replace(/from-\w+-\d+ to-\w+-\d+/g, 'from-amber-100 to-orange-100');
+          iconElement.className += ' text-amber-500';
+        } else {
+          resultIcon.className = resultIcon.className.replace(/from-\w+-\d+ to-\w+-\d+/g, 'from-emerald-100 to-teal-100');
+          iconElement.className += ' text-emerald-500';
+        }
+      }
+      
+      // Update progress bar
+      if (overallScoreBar) {
+        // Reset and then animate to the target width
+        overallScoreBar.className = `h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-1000`;
+        
+        // Force reflow to ensure the reset is applied before animating
+        void overallScoreBar.offsetWidth;
+        
+        // Animate to the target width
+        setTimeout(() => {
+          overallScoreBar.style.width = `${overallScore}%`;
+        }, 50);
+      }
+      
+      // Update score text
+      if (overallScoreText) {
+        overallScoreText.textContent = `Your wellness level: ${overallScore}%`;
+      }
+      
+      // Show the modal with a slight delay to ensure all updates are rendered
+      setTimeout(() => {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Set focus to the modal for better accessibility
+        modal.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-modal', 'true');
+        modal.focus();
+      }, 50);
+      
+      // Close modal function
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('aria-modal', 'false');
+      };
+      
+      // Set up close button
+      const closeButton = document.getElementById('closeModal');
+      if (closeButton) {
+        // Remove any existing event listeners
+        const newCloseButton = closeButton.cloneNode(true);
+        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+        
+        // Add new event listener
+        newCloseButton.addEventListener('click', closeModal);
+      }
+      
+      // Close when clicking outside the modal content
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+      
+      // Close with Escape key
+      document.addEventListener('keydown', function handleEscape(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+          document.removeEventListener('keydown', handleEscape);
+        }
+      });
+    }
+    
+    // Add custom styles for the category cards
+    const style = document.createElement('style');
+    style.textContent = `
+      .category-card {
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 0.75rem;
+        background: white;
+        will-change: transform, box-shadow;
+        cursor: pointer;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+      .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.05));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+      }
+      .category-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .category-card:hover {
+        transform: translateY(-8px) scale(1.02) rotateX(2deg);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 
+                    0 10px 15px -3px rgba(0, 0, 0, 0.08);
+      }
+      .category-card:hover::before {
+        opacity: 1;
+      }
+      .category-card:hover::after {
+        transform: scaleX(1);
+      }
+      .category-card:active {
+        transform: translateY(-3px) scale(0.99);
+        transition-duration: 0.1s;
+      }
+      .category-card.completed {
+        background: linear-gradient(135deg, #f8fafc, #f0f9ff);
+        border-left: 4px solid #10b981;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+      .category-card.completed::before {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.1));
+      }
+      .category-card h3 {
+        transition: color 0.3s ease;
+      }
+      .category-card:hover h3 {
+        color: #3b82f6;
+      }
+      .category-card.completed h3 {
+        color: #10b981;
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Initialize the test
+    init();
+  });
+</script>
+{% endblock %}
